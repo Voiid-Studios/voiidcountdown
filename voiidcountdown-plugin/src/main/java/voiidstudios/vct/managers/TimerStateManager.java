@@ -12,7 +12,7 @@ public class TimerStateManager {
     private final CustomConfig stateConfig;
 
     public TimerStateManager(VoiidCountdownTimer plugin) {
-        this.stateConfig = new CustomConfig("timer_state.yml", plugin, null, true);
+        this.stateConfig = new CustomConfig("timer_state.yml", plugin, "core", true);
         this.stateConfig.registerConfig();
     }
 

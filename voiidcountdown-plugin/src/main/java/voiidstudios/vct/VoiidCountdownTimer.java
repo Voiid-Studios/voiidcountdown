@@ -9,6 +9,7 @@ import voiidstudios.vct.api.update.UpdateCheckerResult;
 import voiidstudios.vct.api.update.UpdateDownloaderGithub;
 import voiidstudios.vct.commands.MainCommand;
 import voiidstudios.vct.configs.ConfigsManager;
+import voiidstudios.vct.expansions.ExpansionManager;
 import voiidstudios.vct.listeners.PlayerListener;
 import voiidstudios.vct.managers.DependencyManager;
 import voiidstudios.vct.managers.DynamicsManager;
@@ -19,7 +20,10 @@ import voiidstudios.vct.utils.ServerVersion;
 
 public final class VoiidCountdownTimer extends JavaPlugin {
     public static String prefix = "&5[&dVCT&5] ";
+    public static String prefixLogger = "§5[§dVCT§5] ";
     public String version = getDescription().getVersion();
+
+    private static final String VCT_LOADED_PROPERTY = "vct.jvm.loaded";
 
     private final String serverName = Bukkit.getServer().getName();
     private final String bukkitVersion = Bukkit.getBukkitVersion();
@@ -33,12 +37,21 @@ public final class VoiidCountdownTimer extends JavaPlugin {
     private static MessagesManager messagesManager;
     private static TimerStateManager timerStateManager;
     private static DependencyManager dependencyManager;
+    private static ExpansionManager expansionManager;
 
     public void onEnable() {
         instance = this;
+
+        if (Boolean.getBoolean(VCT_LOADED_PROPERTY)) {
+            sendConsoleUnstableReloadMessage();
+        } else {
+            System.setProperty(VCT_LOADED_PROPERTY, "true");
+        }
+
         configsManager = new ConfigsManager(this);
         messagesManager = new MessagesManager(this);
         configsManager.configure();
+
         setVersion();
         registerCommands();
         registerEvents();
@@ -63,11 +76,18 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
         timerStateManager = new TimerStateManager(this);
         timerStateManager.loadState();
+
+        expansionManager = new ExpansionManager(this);
+        expansionManager.loadExpansions();
     }
 
     public void onDisable() {
         if (timerStateManager != null && configsManager.getMainConfigManager().isSave_state_timers()) {
             timerStateManager.saveState();
+        }
+
+        if (expansionManager != null) {
+            expansionManager.shutdown();
         }
 
         Bukkit.getConsoleSender().sendMessage(
@@ -155,6 +175,10 @@ public final class VoiidCountdownTimer extends JavaPlugin {
         }
     }
 
+    public void sendConsoleUnstableReloadMessage(){
+        getLogger().severe("Server reload detected. This action is NOT supported and may break VCT and ALL dependent plugins! Please restart your server properly.");
+    }
+
     public static ConfigsManager getConfigsManager() {
         return configsManager;
     }
@@ -173,5 +197,9 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
     public static TimerStateManager getTimerStateManager() {
         return timerStateManager;
+    }
+
+    public static ExpansionManager getExpansionManager() {
+        return expansionManager;
     }
 }

@@ -11,43 +11,61 @@ import voiidstudios.vct.api.Timer;
 import voiidstudios.vct.api.VCTActions;
 import voiidstudios.vct.api.VCTEvent;
 import voiidstudios.vct.configs.model.TimerConfig;
+import voiidstudios.vct.expansions.ExpansionManager;
+import voiidstudios.vct.expansions.ExpansionMetadata;
 import voiidstudios.vct.managers.MessagesManager;
 import voiidstudios.vct.managers.TimerManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
+        ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
 
-        if(sender.isOp() || sender.hasPermission("voiidcountdowntimer.admin")) {
-            if(args.length >= 1){
-                if(args[0].equalsIgnoreCase("help")){
-                    help(sender);
-                }else if (args[0].equalsIgnoreCase("reload")){
-                    reload(sender, msgManager);
-                }else if (args[0].equalsIgnoreCase("set")){
-                    set(sender, args, msgManager);
-                }else if (args[0].equalsIgnoreCase("pause")){
-                    pause(sender, msgManager);
-                }else if (args[0].equalsIgnoreCase("resume")){
-                    resume(sender, msgManager);
-                }else if (args[0].equalsIgnoreCase("stop")){
-                    stop(sender);
-                }else if (args[0].equalsIgnoreCase("modify")){
-                    modify(sender, args, msgManager);
-                }else{
-                    help(sender);
-                }
-            }else{
+        boolean hasAdmin = sender.isOp() || sender.hasPermission("voiidcountdowntimer.admin");
+
+        if (hasAdmin && args.length >= 1) {
+            if(args[0].equalsIgnoreCase("help")){
                 help(sender);
+                return true;
+            }else if (args[0].equalsIgnoreCase("reload")){
+                reload(sender, msgManager);
+                return true;
+            }else if (args[0].equalsIgnoreCase("set")){
+                set(sender, args, msgManager);
+                return true;
+            }else if (args[0].equalsIgnoreCase("pause")){
+                pause(sender, msgManager);
+                return true;
+            }else if (args[0].equalsIgnoreCase("resume")){
+                resume(sender, msgManager);
+                return true;
+            }else if (args[0].equalsIgnoreCase("stop")){
+                stop(sender);
+                return true;
+            }else if (args[0].equalsIgnoreCase("modify")){
+                modify(sender, args, msgManager);
+            }else if (args[0].equalsIgnoreCase("expansion")){
+                expansion(sender, args, expansionManager);
+                return true;
             }
-        }else{
-            msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
         }
+
+        if (expansionManager != null && expansionManager.executeCommand(sender, args)) {
+            return true;
+        }
+
+        if (!hasAdmin) {
+            msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
+            return true;
+        }
+
+        help(sender);
 
         return true;
     }
@@ -441,6 +459,127 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         msgManager.sendConfigMessage(sender, "Messages.timerModifyInvalid", true, null);
     }
     
+    private void expansion(CommandSender sender, String[] args, ExpansionManager expansionManager) {
+        if (expansionManager == null) {
+            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cLas expansiones no están habilitadas en este servidor."));
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cUso: /vct expansion <info|enable|disable|reload|reloadall> [nombre]"));
+            return;
+        }
+
+        String action = args[1].toLowerCase(Locale.ROOT);
+        String targetName = args.length >= 3 ? args[2] : null;
+
+        switch (action) {
+            case "info":
+                if (targetName == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    return;
+                }
+
+                ExpansionMetadata infoMetadata = expansionManager.getExpansionMetadata(targetName);
+                if (infoMetadata == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    return;
+                }
+
+                boolean infoLoaded = expansionManager.isExpansionLoaded(infoMetadata.getName());
+                sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&7Expansión &d" + infoMetadata.getName() + "&7:"));
+                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Estado: " + (infoLoaded ? "&aHabilitada" : "&cDeshabilitada")));
+                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Versión: &f" + infoMetadata.getVersion()));
+                List<String> authors = infoMetadata.getAuthors();
+                String authorsText = authors.isEmpty() ? "N/A" : String.join("&7, &f", authors);
+                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Autores: &f" + authorsText));
+                String description = infoMetadata.getDescription();
+                if (description == null || description.trim().isEmpty()) {
+                    description = "Sin descripción.";
+                }
+                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Descripción: &f" + description));
+                return;
+            case "enable":
+                if (targetName == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    return;
+                }
+
+                ExpansionMetadata enableMetadata = expansionManager.getExpansionMetadata(targetName);
+                if (enableMetadata == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    return;
+                }
+
+                if (expansionManager.isExpansionLoaded(enableMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + enableMetadata.getName() + "&e' ya está habilitada."));
+                    return;
+                }
+
+                if (expansionManager.enableExpansion(enableMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe habilitó la expansión '&f" + enableMetadata.getName() + "&a'."));
+                } else {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo habilitar la expansión '&f" + enableMetadata.getName() + "&c'. Revisa la consola para más detalles."));
+                }
+                return;
+            case "disable":
+                if (targetName == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    return;
+                }
+
+                ExpansionMetadata disableMetadata = expansionManager.getExpansionMetadata(targetName);
+                if (disableMetadata == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    return;
+                }
+
+                if (!expansionManager.isExpansionLoaded(disableMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + disableMetadata.getName() + "&e' ya está deshabilitada."));
+                    return;
+                }
+
+                if (expansionManager.disableExpansion(disableMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe deshabilitó la expansión '&f" + disableMetadata.getName() + "&a'."));
+                } else {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo deshabilitar la expansión '&f" + disableMetadata.getName() + "&c'."));
+                }
+                return;
+            case "reload":
+                if (targetName == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    return;
+                }
+
+                ExpansionMetadata reloadMetadata = expansionManager.getExpansionMetadata(targetName);
+                if (reloadMetadata == null) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    return;
+                }
+
+                if (!expansionManager.isExpansionLoaded(reloadMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + reloadMetadata.getName() + "&e' no está habilitada."));
+                    return;
+                }
+
+                if (expansionManager.reloadExpansion(reloadMetadata.getName())) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe recargó la expansión '&f" + reloadMetadata.getName() + "&a'."));
+                } else {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo recargar la expansión '&f" + reloadMetadata.getName() + "&c'."));
+                }
+                return;
+            case "reloadall":
+                int reloaded = expansionManager.reloadAllExpansions();
+                if (reloaded == 0) {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eNo se recargó ninguna expansión. Verifica que existan expansiones válidas."));
+                } else {
+                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe recargaron &f" + reloaded + " &aexpansiones."));
+                }
+                return;
+            default:
+                sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cUso: /vct expansion <info|enable|disable|reload|reloadall> [nombre]"));
+        }
+    }
 
     public void help(CommandSender sender){
         sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Running &dVoiid Countdown Timer &ev"+VoiidCountdownTimer.getInstance().getDescription().getVersion()));
@@ -451,24 +590,45 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct resume &7- Resume the timer."));
         sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct stop &7- Stop the timer."));
         sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct modify &e<modifier> &7- Modify the timer."));
+        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct expansion &7- Manage installed expansions."));
+
+        ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
+        if (expansionManager != null) {
+            for (String line : expansionManager.getHelpLines()) {
+                sender.sendMessage(MessagesManager.getColoredMessage(line));
+            }
+        }
     }
 
     public List<String> onTabComplete(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args){
-        if(sender.isOp() || sender.hasPermission("voiidcountdowntimer.admin")){
-            if(args.length == 1){
-                List<String> completions = new ArrayList<String>();
+        ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
+        boolean hasAdmin = sender.isOp() || sender.hasPermission("voiidcountdowntimer.admin");
+
+        if (args.length == 1) {
+            java.util.Set<String> completions = new java.util.LinkedHashSet<>();
+
+            if (hasAdmin) {
                 List<String> commands = new ArrayList<String>();
                 commands.add("help");commands.add("reload");
                 commands.add("set");commands.add("pause");
                 commands.add("resume");commands.add("stop");
-                commands.add("modify");
+                commands.add("modify");commands.add("expansion");
                 for(String c : commands) {
                     if(args[0].isEmpty() || c.startsWith(args[0].toLowerCase())) {
                         completions.add(c);
                     }
                 }
-                return completions;
-            } else if (args.length == 2){
+            }
+
+            if (expansionManager != null) {
+                completions.addAll(expansionManager.getRootSuggestions(args[0]));
+            }
+
+            return completions.isEmpty() ? null : new ArrayList<>(completions);
+        }
+
+        if (hasAdmin) {
+            if (args.length == 2){
                 List<String> subcompletions = new ArrayList<String>();
                 List<String> subcommands = new ArrayList<String>();
 
@@ -480,6 +640,12 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     subcommands.add("sound_pitch");subcommands.add("text");
                 }else if(args[0].equalsIgnoreCase("set")){
                     subcommands.add("<HH:MM:SS>");
+                }else if(args[0].equalsIgnoreCase("expansion")){
+                    subcommands.add("info");
+                    subcommands.add("enable");
+                    subcommands.add("disable");
+                    subcommands.add("reload");
+                    subcommands.add("reloadall");
                 }
 
                 for(String c : subcommands) {
@@ -487,8 +653,25 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                         subcompletions.add(c);
                     }
                 }
-                return subcompletions;
+
+                if(!subcompletions.isEmpty()) return subcompletions;
             } else if (args.length == 3){
+                if (args[0].equalsIgnoreCase("expansion") && expansionManager != null) {
+                    String action = args[1].toLowerCase(Locale.ROOT);
+                    if (!action.equals("reloadall")) {
+                        List<String> names = expansionManager.getKnownExpansionNames();
+                        List<String> matches = new ArrayList<>();
+                        for (String name : names) {
+                            if (args[2].isEmpty() || name.toLowerCase(Locale.ROOT).startsWith(args[2].toLowerCase(Locale.ROOT))) {
+                                matches.add(name);
+                            }
+                        }
+                        if (!matches.isEmpty()) {
+                            return matches;
+                        }
+                    }
+                }
+
                 List<String> subcompletions = new ArrayList<String>();
                 List<String> subcommands = new ArrayList<String>();
 
@@ -513,8 +696,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     }else if(args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("set") || args[1].equalsIgnoreCase("take")){
                         subcommands.add("<HH:MM:SS>");
                     }
-                } else if(args[0].equalsIgnoreCase("set")){
-                    return getTimersCompletions(args, 2, true);
+                } else if(args[0].equalsIgnoreCase("set")){ 
+                    List<String> timers = getTimersCompletions(args, 2, true);
+                    if (timers != null) {
+                        return timers;
+                    }
                 }
 
                 for(String c : subcommands) {
@@ -522,7 +708,15 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                         subcompletions.add(c);
                     }
                 }
-                return subcompletions;
+                
+                if(!subcompletions.isEmpty()) return subcompletions;
+            }
+        }
+
+        if (expansionManager != null) {
+            List<String> expansionCompletions = expansionManager.getTabCompletions(sender, args);
+            if (expansionCompletions != null && !expansionCompletions.isEmpty()) {
+                return expansionCompletions;
             }
         }
 
