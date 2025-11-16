@@ -154,6 +154,36 @@ public class MainConfigManager {
                 getConfig().set("Messages.timerModifyText", "&aThe text of the timer %TIMER% has been changed to \"&r%TEXT%&a\".");
                 saveConfig();
             }
+            if(!text.contains("timerExpansionInvalid:")){
+                getConfig().set("Messages.timerExpansionInvalid", "&cUse: /vct expansion <info|enable|disable|reload|reloadall> <expansion_id>");
+                getConfig().set("Messages.timerExpansionDisabled", "&cExpansions are not enabled on this server.");
+                getConfig().set("Messages.timerExpansionNotSpecified", "&cYou must specify the id of the expansion.");
+                getConfig().set("Messages.timerExpansionNotFound", "&cThe &e%EXPANSION% &cexpansion could not be found.");
+                saveConfig();
+            }
+            if(!text.contains("timerExpansionEnableAlreadyEnabled:")){
+                getConfig().set("Messages.timerExpansionEnableAlreadyEnabled", "&cThe &e%EXPANSION% &cextension is already enabled.");
+                getConfig().set("Messages.timerExpansionEnableError", "&cAn error occurred while attempting to enable the &e%EXPANSION% &cextension. Check the console for more details.");
+                getConfig().set("Messages.timerExpansionEnable", "&aThe &e%EXPANSION% &aexpansion has been enabled.");
+                saveConfig();
+            }
+            if(!text.contains("timerExpansionDisableAlreadyDisabled:")){
+                getConfig().set("Messages.timerExpansionDisableAlreadyDisabled", "&cThe &e%EXPANSION% &cextension is already disabled.");
+                getConfig().set("Messages.timerExpansionDisableError", "&cAn error occurred while attempting to disable the &e%EXPANSION% &cextension. Check the console for more details.");
+                getConfig().set("Messages.timerExpansionDisable", "&aThe &e%EXPANSION% &aexpansion has been disabled.");
+                saveConfig();
+            }
+            if(!text.contains("timerExpansionReloadDisabled:")){
+                getConfig().set("Messages.timerExpansionReloadDisabled", "&cThe &e%EXPANSION% &cextension is not enabled. Please enable it with /vct expansion enable to reload it.");
+                getConfig().set("Messages.timerExpansionReloadError", "&cAn error occurred while attempting to reload the &e%EXPANSION% &cextension. Check the console for more details.");
+                getConfig().set("Messages.timerExpansionReload", "&aThe &e%EXPANSION% &aexpansion has been reloaded.");
+                saveConfig();
+            }
+            if(!text.contains("timerExpansionReloadallError:")){
+                getConfig().set("Messages.timerExpansionReloadallError", "&cNo expansion was reloaded. Verify that valid expansions exist.");
+                getConfig().set("Messages.timerExpansionReloadall", "&a%EXPANSIONS% expansions were reloaded.");
+                saveConfig();
+            }
             if(!text.contains("timerStart:")){
                 getConfig().set("Messages.timerStart", "&aTimer started of %HH%:%MM%:%SS%!");
                 saveConfig();

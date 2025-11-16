@@ -18,40 +18,63 @@ import voiidstudios.vct.managers.TimerManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class MainCommand implements CommandExecutor, TabCompleter {
+    private static final String ADMIN_PERMISSION = "voiidcountdowntimer.admin";
+    private static final Map<String, String> COMMAND_PERMISSIONS = new LinkedHashMap<>();
+    private static final List<String> ROOT_COMMANDS = new ArrayList<>();
+
+    static {
+        COMMAND_PERMISSIONS.put("help", "voiidcountdowntimer.command.help");
+        COMMAND_PERMISSIONS.put("reload", "voiidcountdowntimer.command.reload");
+        COMMAND_PERMISSIONS.put("set", "voiidcountdowntimer.command.set");
+        COMMAND_PERMISSIONS.put("pause", "voiidcountdowntimer.command.pause");
+        COMMAND_PERMISSIONS.put("resume", "voiidcountdowntimer.command.resume");
+        COMMAND_PERMISSIONS.put("stop", "voiidcountdowntimer.command.stop");
+        COMMAND_PERMISSIONS.put("modify", "voiidcountdowntimer.command.modify");
+        COMMAND_PERMISSIONS.put("expansion", "voiidcountdowntimer.command.expansion");
+
+        ROOT_COMMANDS.addAll(COMMAND_PERMISSIONS.keySet());
+    }
+
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
         ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
 
-        boolean hasAdmin = sender.isOp() || sender.hasPermission("voiidcountdowntimer.admin");
+        if (args.length >= 1) {
+            String root = args[0].toLowerCase(Locale.ROOT);
+            if (ROOT_COMMANDS.contains(root) && !hasCommandPermission(sender, root)) {
+                msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
+                return true;
+            }
 
-        if (hasAdmin && args.length >= 1) {
-            if(args[0].equalsIgnoreCase("help")){
+            if (root.equals("help")){
                 help(sender);
                 return true;
-            }else if (args[0].equalsIgnoreCase("reload")){
+            }else if (root.equals("reload")){
                 reload(sender, msgManager);
                 return true;
-            }else if (args[0].equalsIgnoreCase("set")){
+            }else if (root.equals("set")){
                 set(sender, args, msgManager);
                 return true;
-            }else if (args[0].equalsIgnoreCase("pause")){
+            }else if (root.equals("pause")){
                 pause(sender, msgManager);
                 return true;
-            }else if (args[0].equalsIgnoreCase("resume")){
+            }else if (root.equals("resume")){
                 resume(sender, msgManager);
                 return true;
-            }else if (args[0].equalsIgnoreCase("stop")){
+            }else if (root.equals("stop")){
                 stop(sender);
                 return true;
-            }else if (args[0].equalsIgnoreCase("modify")){
+            }else if (root.equals("modify")){
                 modify(sender, args, msgManager);
-            }else if (args[0].equalsIgnoreCase("expansion")){
-                expansion(sender, args, expansionManager);
+                return true;
+            }else if (root.equals("expansion")){
+                expansion(sender, args, expansionManager, msgManager);
                 return true;
             }
         }
@@ -60,7 +83,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!hasAdmin) {
+        if (!hasCommandPermission(sender, "help")) {
             msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
             return true;
         }
@@ -459,14 +482,19 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         msgManager.sendConfigMessage(sender, "Messages.timerModifyInvalid", true, null);
     }
     
-    private void expansion(CommandSender sender, String[] args, ExpansionManager expansionManager) {
+    private void expansion(CommandSender sender, String[] args, ExpansionManager expansionManager, MessagesManager msgManager) {
         if (expansionManager == null) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cLas expansiones no están habilitadas en este servidor."));
+            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cExpansions are not enabled on this server."));
             return;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cUso: /vct expansion <info|enable|disable|reload|reloadall> [nombre]"));
+            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Options for expansions"));
+            sender.sendMessage(MessagesManager.getColoredMessage("&6> &einfo &d<expansion_id> &7- Displays expansion information."));
+            sender.sendMessage(MessagesManager.getColoredMessage("&6> &eenable &d<expansion_id> &7- Enable an expansion."));
+            sender.sendMessage(MessagesManager.getColoredMessage("&6> &edisable &d<expansion_id> &7- Disable an expansion."));
+            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ereload &d<expansion_id> &7- Reload an expansion"));
+            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ereloadall &7- Reload all expansions."));
             return;
         }
 
@@ -476,13 +504,16 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         switch (action) {
             case "info":
                 if (targetName == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
                     return;
                 }
 
                 ExpansionMetadata infoMetadata = expansionManager.getExpansionMetadata(targetName);
                 if (infoMetadata == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    Map<String, String> expansionInfoNotFoundRepl = new HashMap<>();
+                    expansionInfoNotFoundRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionInfoNotFoundRepl);
                     return;
                 }
 
@@ -501,96 +532,135 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 return;
             case "enable":
                 if (targetName == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
                     return;
                 }
 
                 ExpansionMetadata enableMetadata = expansionManager.getExpansionMetadata(targetName);
                 if (enableMetadata == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    Map<String, String> expansionEnableNotFoundRepl = new HashMap<>();
+                    expansionEnableNotFoundRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionEnableNotFoundRepl);
                     return;
                 }
 
                 if (expansionManager.isExpansionLoaded(enableMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + enableMetadata.getName() + "&e' ya está habilitada."));
+                    Map<String, String> expansionEnableAlreadyEnabledRepl = new HashMap<>();
+                    expansionEnableAlreadyEnabledRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnableAlreadyEnabled", true, expansionEnableAlreadyEnabledRepl);
                     return;
                 }
 
                 if (expansionManager.enableExpansion(enableMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe habilitó la expansión '&f" + enableMetadata.getName() + "&a'."));
+                    Map<String, String> expansionEnableRepl = new HashMap<>();
+                    expansionEnableRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnable", true, expansionEnableRepl);
                 } else {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo habilitar la expansión '&f" + enableMetadata.getName() + "&c'. Revisa la consola para más detalles."));
+                    Map<String, String> expansionEnableErrorRepl = new HashMap<>();
+                    expansionEnableErrorRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnableError", true, expansionEnableErrorRepl);
                 }
                 return;
             case "disable":
                 if (targetName == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
                     return;
                 }
 
                 ExpansionMetadata disableMetadata = expansionManager.getExpansionMetadata(targetName);
                 if (disableMetadata == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    Map<String, String> expansionDisableNotFoundRepl = new HashMap<>();
+                    expansionDisableNotFoundRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionDisableNotFoundRepl);
                     return;
                 }
 
                 if (!expansionManager.isExpansionLoaded(disableMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + disableMetadata.getName() + "&e' ya está deshabilitada."));
+                    Map<String, String> expansionDisableAlreadyDisabledRepl = new HashMap<>();
+                    expansionDisableAlreadyDisabledRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisableAlreadyDisabled", true, expansionDisableAlreadyDisabledRepl);
                     return;
                 }
 
                 if (expansionManager.disableExpansion(disableMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe deshabilitó la expansión '&f" + disableMetadata.getName() + "&a'."));
+                    Map<String, String> expansionDisableRepl = new HashMap<>();
+                    expansionDisableRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisable", true, expansionDisableRepl);
                 } else {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo deshabilitar la expansión '&f" + disableMetadata.getName() + "&c'."));
+                    Map<String, String> expansionDisableErrorRepl = new HashMap<>();
+                    expansionDisableErrorRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisableError", true, expansionDisableErrorRepl);
                 }
                 return;
             case "reload":
                 if (targetName == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cDebes especificar el nombre de la expansión."));
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
                     return;
                 }
 
                 ExpansionMetadata reloadMetadata = expansionManager.getExpansionMetadata(targetName);
                 if (reloadMetadata == null) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se encontró la expansión '&f" + targetName + "&c'."));
+                    Map<String, String> expansionReloadNotFoundRepl = new HashMap<>();
+                    expansionReloadNotFoundRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionReloadNotFoundRepl);
                     return;
                 }
 
                 if (!expansionManager.isExpansionLoaded(reloadMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eLa expansión '&f" + reloadMetadata.getName() + "&e' no está habilitada."));
+                    Map<String, String> expansionReloadDisabledRepl = new HashMap<>();
+                    expansionReloadDisabledRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadDisabled", true, expansionReloadDisabledRepl);
                     return;
                 }
 
                 if (expansionManager.reloadExpansion(reloadMetadata.getName())) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe recargó la expansión '&f" + reloadMetadata.getName() + "&a'."));
+                    Map<String, String> expansionReloadRepl = new HashMap<>();
+                    expansionReloadRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReload", true, expansionReloadRepl);
                 } else {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo se pudo recargar la expansión '&f" + reloadMetadata.getName() + "&c'."));
+                    Map<String, String> expansionReloadErrorRepl = new HashMap<>();
+                    expansionReloadErrorRepl.put("%EXPANSION%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadError", true, expansionReloadErrorRepl);
                 }
                 return;
             case "reloadall":
                 int reloaded = expansionManager.reloadAllExpansions();
                 if (reloaded == 0) {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&eNo se recargó ninguna expansión. Verifica que existan expansiones válidas."));
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadallError", true, null);
                 } else {
-                    sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aSe recargaron &f" + reloaded + " &aexpansiones."));
+                    Map<String, String> expansionReloadallRepl = new HashMap<>();
+                    expansionReloadallRepl.put("%EXPANSIONS%", targetName);
+
+                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadall", true, expansionReloadallRepl);
                 }
                 return;
             default:
-                sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cUso: /vct expansion <info|enable|disable|reload|reloadall> [nombre]"));
+                msgManager.sendConfigMessage(sender, "Messages.timerExpansionInvalid", true, null);
         }
     }
 
     public void help(CommandSender sender){
         sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Running &dVoiid Countdown Timer &ev"+VoiidCountdownTimer.getInstance().getDescription().getVersion()));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct help &7- Shows this message."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct reload &7- Reloads the config."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct set &e<HH:MM:SS> &7- Set the timer."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct pause &7- Pause the timer."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct resume &7- Resume the timer."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct stop &7- Stop the timer."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct modify &e<modifier> &7- Modify the timer."));
-        sender.sendMessage(MessagesManager.getColoredMessage("&5> &6/vct expansion &7- Manage installed expansions."));
+        sendHelpLine(sender, "help", "&5> &6/vct help &7- Shows this message.");
+        sendHelpLine(sender, "reload", "&5> &6/vct reload &7- Reloads the config.");
+        sendHelpLine(sender, "set", "&5> &6/vct set &e<HH:MM:SS> &7- Set the timer.");
+        sendHelpLine(sender, "pause", "&5> &6/vct pause &7- Pause the timer.");
+        sendHelpLine(sender, "resume", "&5> &6/vct resume &7- Resume the timer.");
+        sendHelpLine(sender, "stop", "&5> &6/vct stop &7- Stop the timer.");
+        sendHelpLine(sender, "modify", "&5> &6/vct modify &e<modifier> &7- Modify the timer.");
+        sendHelpLine(sender, "expansion", "&5> &6/vct expansion &7- Manage installed expansions.");
 
         ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
         if (expansionManager != null) {
@@ -641,10 +711,8 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 }else if(args[0].equalsIgnoreCase("set")){
                     subcommands.add("<HH:MM:SS>");
                 }else if(args[0].equalsIgnoreCase("expansion")){
-                    subcommands.add("info");
-                    subcommands.add("enable");
-                    subcommands.add("disable");
-                    subcommands.add("reload");
+                    subcommands.add("info");subcommands.add("enable");
+                    subcommands.add("disable");subcommands.add("reload");
                     subcommands.add("reloadall");
                 }
 
@@ -721,6 +789,26 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
 
         return null;
+    }
+
+    private void sendHelpLine(CommandSender sender, String commandKey, String message) {
+        if (!hasCommandPermission(sender, commandKey)) {
+            return;
+        }
+        sender.sendMessage(MessagesManager.getColoredMessage(message));
+    }
+
+    private boolean hasCommandPermission(CommandSender sender, String commandKey) {
+        if (sender.isOp() || sender.hasPermission(ADMIN_PERMISSION)) {
+            return true;
+        }
+
+        String permission = COMMAND_PERMISSIONS.get(commandKey);
+        if (permission == null) {
+            return false;
+        }
+
+        return sender.hasPermission(permission);
     }
 
     public List<String> getTimersCompletions(String[] args, int argTimerPos, boolean onlyEnabled) {

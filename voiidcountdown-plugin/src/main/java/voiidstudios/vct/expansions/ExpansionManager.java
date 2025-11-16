@@ -8,6 +8,7 @@ import voiidstudios.vct.managers.MessagesManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,18 +57,51 @@ public class ExpansionManager {
             return;
         }
 
+        int loadedCount = 0;
+        int skippedCount = 0;
+
         for (ExpansionHandle handle : discoveredExpansions.values()) {
-            loadExpansion(handle);
+            if (!handle.metadata.isEnabled()) {
+                skippedCount++;
+                Bukkit.getConsoleSender().sendMessage(
+                    MessagesManager.getColoredMessage(
+                        VoiidCountdownTimer.prefix +
+                        String.format(
+                            Locale.ROOT,
+                            "&3The &e%s&3 extension has been skipped because it is disabled.",
+                            handle.metadata.getName()
+                        )
+                    )
+                );
+                continue;
+            }
+
+            if (loadExpansion(handle)) {
+                loadedCount++;
+            } else {
+                skippedCount++;
+            }
         }
+
+        Bukkit.getConsoleSender().sendMessage(
+            MessagesManager.getColoredMessage(
+                VoiidCountdownTimer.prefix +
+                String.format(Locale.ROOT, "&a%d expansion(s) loaded! &3%d expansion(s) skipped.", loadedCount, skippedCount)
+            )
+        );
     }
 
-    private void loadExpansion(ExpansionHandle handle) {
+    private boolean loadExpansion(ExpansionHandle handle) {
         if (handle == null) {
-            return;
+            return false;
         }
 
         if (loadedExpansions.containsKey(handle.key)) {
-            return;
+            return true;
+        }
+
+        if (!handle.metadata.isEnabled()) {
+            return false;
         }
 
         try {
@@ -80,6 +114,7 @@ public class ExpansionManager {
                         String.format(Locale.ROOT, "&aLoaded expansion %s &ev%s", handle.metadata.getName(), handle.metadata.getVersion())
                     )
                 );
+                return true;
             }
         } catch (InvalidExpansionException exception) {
             plugin.getLogger().log(
@@ -95,6 +130,8 @@ public class ExpansionManager {
                 )
             );
         }
+
+        return false;
     }
 
     private void exportBundledExamples() {
@@ -192,8 +229,28 @@ public class ExpansionManager {
             return false;
         }
 
-        loadExpansion(handle);
-        return loadedExpansions.containsKey(handle.key);
+        String key = handle.key;
+        boolean wasEnabled = handle.metadata.isEnabled();
+
+        boolean updated = wasEnabled || updateEnabledFlag(handle.directory, true);
+        if (!updated) {
+            return false;
+        }
+
+        refreshDiscoveredExpansions();
+        handle = discoveredExpansions.get(key);
+        if (handle == null || !handle.metadata.isEnabled()) {
+            return false;
+        }
+
+        if (!loadExpansion(handle)) {
+            if (!wasEnabled) {
+                updateEnabledFlag(handle.directory, false);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     public boolean disableExpansion(String name) {
@@ -208,7 +265,7 @@ public class ExpansionManager {
             expansion.disable();
         } catch (Exception exception) {
             plugin.getLogger().log(
-                Level.WARNING, 
+                Level.WARNING,
                 String.format(Locale.ROOT, "Error while disabling expansion %s", expansion.getMetadata().getName()),
                 exception
             );
@@ -217,7 +274,7 @@ public class ExpansionManager {
                 MessagesManager.getColoredMessage(
                     VoiidCountdownTimer.prefix +
                     String.format(Locale.ROOT, "&cUnable to disable expansion %s", expansion.getMetadata().getName())
-               )
+                )
             );
 
             success = false;
@@ -225,6 +282,7 @@ public class ExpansionManager {
 
         if (success) {
             loadedExpansions.remove(key);
+            success = updateEnabledFlag(expansion.getDirectory(), false);
         }
 
         return success;
@@ -243,7 +301,10 @@ public class ExpansionManager {
             return false;
         }
 
-        loadExpansion(handle);
+        if (!loadExpansion(handle)) {
+            return false;
+        }
+
         return loadedExpansions.containsKey(key);
     }
 
@@ -257,9 +318,7 @@ public class ExpansionManager {
 
         int loadedCount = 0;
         for (ExpansionHandle handle : discoveredExpansions.values()) {
-            int before = loadedExpansions.size();
-            loadExpansion(handle);
-            if (loadedExpansions.size() > before) {
+            if (loadExpansion(handle)) {
                 loadedCount++;
             }
         }
@@ -347,6 +406,32 @@ public class ExpansionManager {
             }
 
             discoveredExpansions.put(key, new ExpansionHandle(key, child, metadata));
+        }
+    }
+
+    private boolean updateEnabledFlag(File directory, boolean enabled) {
+        if (directory == null) {
+            return false;
+        }
+
+        File metadataFile = new File(directory, METADATA_FILE);
+        if (!metadataFile.exists()) {
+            return false;
+        }
+
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(metadataFile);
+        configuration.set("enabled", enabled);
+
+        try {
+            configuration.save(metadataFile);
+            return true;
+        } catch (IOException exception) {
+            plugin.getLogger().log(
+                Level.WARNING,
+                String.format(Locale.ROOT, "Unable to update enabled state for expansion in %s", directory.getName()),
+                exception
+            );
+            return false;
         }
     }
 
