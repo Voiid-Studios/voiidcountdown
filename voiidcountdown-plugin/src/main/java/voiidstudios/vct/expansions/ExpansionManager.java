@@ -6,7 +6,6 @@ import voiidstudios.vct.expansions.command.ExpansionCommandRegistry;
 import voiidstudios.vct.expansions.exceptions.InvalidExpansionException;
 import voiidstudios.vct.managers.MessagesManager;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -27,6 +26,7 @@ public class ExpansionManager {
     private final ExpansionCommandRegistry commandRegistry = new ExpansionCommandRegistry();
     private final Map<String, ScriptExpansion> loadedExpansions = new LinkedHashMap<>();
     private final Map<String, ExpansionHandle> discoveredExpansions = new LinkedHashMap<>();
+    private final MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
     private final File expansionsDirectory;
 
     private static final String METADATA_FILE = "expansion.yml";
@@ -63,16 +63,7 @@ public class ExpansionManager {
         for (ExpansionHandle handle : discoveredExpansions.values()) {
             if (!handle.metadata.isEnabled()) {
                 skippedCount++;
-                Bukkit.getConsoleSender().sendMessage(
-                    MessagesManager.getColoredMessage(
-                        VoiidCountdownTimer.prefix +
-                        String.format(
-                            Locale.ROOT,
-                            "&3The &e%s&3 extension has been skipped because it is disabled.",
-                            handle.metadata.getName()
-                        )
-                    )
-                );
+                msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&3The &e%s&3 extension has been skipped because it is disabled.", handle.metadata.getName()));
                 continue;
             }
 
@@ -83,12 +74,7 @@ public class ExpansionManager {
             }
         }
 
-        Bukkit.getConsoleSender().sendMessage(
-            MessagesManager.getColoredMessage(
-                VoiidCountdownTimer.prefix +
-                String.format(Locale.ROOT, "&a%d expansion(s) loaded! &3%d expansion(s) skipped.", loadedCount, skippedCount)
-            )
-        );
+        msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&a%d expansion(s) loaded! &3%d expansion(s) skipped.", loadedCount, skippedCount));
     }
 
     private boolean loadExpansion(ExpansionHandle handle) {
@@ -108,12 +94,7 @@ public class ExpansionManager {
             ScriptExpansion expansion = new ScriptExpansion(plugin, handle.metadata, handle.directory, commandRegistry);
             if (expansion.load()) {
                 loadedExpansions.put(handle.key, expansion);
-                Bukkit.getConsoleSender().sendMessage(
-                    MessagesManager.getColoredMessage(
-                        VoiidCountdownTimer.prefix +
-                        String.format(Locale.ROOT, "&aLoaded expansion %s &ev%s", handle.metadata.getName(), handle.metadata.getVersion())
-                    )
-                );
+                msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&aLoaded expansion %s &ev%s", handle.metadata.getName(), handle.metadata.getVersion()));
                 return true;
             }
         } catch (InvalidExpansionException exception) {
@@ -123,12 +104,7 @@ public class ExpansionManager {
                 exception
             );
 
-            Bukkit.getConsoleSender().sendMessage(
-                MessagesManager.getColoredMessage(
-                    VoiidCountdownTimer.prefix +
-                    String.format(Locale.ROOT, "&cUnable to load expansion %s", handle.metadata.getName())
-                )
-            );
+            msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&cUnable to load expansion %s", handle.metadata.getName()));
         }
 
         return false;
@@ -180,12 +156,7 @@ public class ExpansionManager {
                     exception
                 );
 
-                Bukkit.getConsoleSender().sendMessage(
-                    MessagesManager.getColoredMessage(
-                        VoiidCountdownTimer.prefix +
-                        String.format(Locale.ROOT, "&cUnable to disable expansion %s", expansion.getMetadata().getName())
-                    )
-                );
+                msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&cUnable to disable expansion %s", expansion.getMetadata().getName()));
             }
         }
 
@@ -270,12 +241,7 @@ public class ExpansionManager {
                 exception
             );
 
-            Bukkit.getConsoleSender().sendMessage(
-                MessagesManager.getColoredMessage(
-                    VoiidCountdownTimer.prefix +
-                    String.format(Locale.ROOT, "&cUnable to disable expansion %s", expansion.getMetadata().getName())
-                )
-            );
+            msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&cUnable to disable expansion %s", expansion.getMetadata().getName()));
 
             success = false;
         }
@@ -369,12 +335,7 @@ public class ExpansionManager {
         for (File child : children) {
             File metadataFile = new File(child, METADATA_FILE);
             if (!metadataFile.exists()) {
-                Bukkit.getConsoleSender().sendMessage(
-                    MessagesManager.getColoredMessage(
-                        VoiidCountdownTimer.prefix +
-                        String.format(Locale.ROOT, "&3Skipping expansion in %s because %s is missing", child.getName(), METADATA_FILE)
-                    )
-                );
+                msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&3Skipping expansion in %s because %s is missing", child.getName(), METADATA_FILE));
 
                 continue;
             }
@@ -389,12 +350,7 @@ public class ExpansionManager {
                     exception
                 );
 
-                Bukkit.getConsoleSender().sendMessage(
-                    MessagesManager.getColoredMessage(
-                        VoiidCountdownTimer.prefix +
-                        String.format(Locale.ROOT, "&cInvalid expansion metadata in %s", child.getName(), METADATA_FILE)
-                    )
-                );
+                msgManager.console(VoiidCountdownTimer.prefix + String.format(Locale.ROOT, "&cInvalid expansion metadata in %s", child.getName(), METADATA_FILE));
 
                 continue;
             }

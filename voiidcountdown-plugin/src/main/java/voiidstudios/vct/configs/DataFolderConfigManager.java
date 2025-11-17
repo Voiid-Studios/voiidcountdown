@@ -20,17 +20,11 @@ public abstract class DataFolderConfigManager {
         loadConfigs();
     }
 
-    public void createFolder(){
-        File folder;
-        try {
-            folder = new File(plugin.getDataFolder() + File.separator + folderName);
-            if(!folder.exists()){
-                folder.mkdirs();
-                createFiles();
-            }
-        } catch(SecurityException e) {
-            folder = null;
-        }
+    public void createFolder() {
+        File folder = new File(plugin.getDataFolder(), folderName);
+
+        folder.mkdirs();
+        createFiles();
     }
 
     public CustomConfig getConfigFile(String pathName) {

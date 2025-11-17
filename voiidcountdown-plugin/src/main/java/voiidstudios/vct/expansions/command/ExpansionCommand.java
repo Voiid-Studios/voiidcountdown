@@ -69,12 +69,14 @@ public class ExpansionCommand {
     }
 
     public boolean execute(CommandSender sender, String[] args) {
+        MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
+
         if (executor == null) {
             return false;
         }
 
         if (permission != null && !permission.isEmpty() && !sender.hasPermission(permission)) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cNo tienes permiso para usar este comando."));
+            msgManager.send(sender, "command.no_permissions");
             return true;
         }
 
@@ -88,7 +90,7 @@ public class ExpansionCommand {
             expansion.getPlugin().getLogger().log(Level.SEVERE,
                     String.format(Locale.ROOT, "Failed to execute expansion command '%s' from %s", name, expansion.getMetadata().getName()),
                     throwable);
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cOcurrió un error al ejecutar el comando de la expansión."));
+            msgManager.send(sender, "expansion.expansion_command.error");
             return true;
         }
     }

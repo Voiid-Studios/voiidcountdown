@@ -48,7 +48,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         if (args.length >= 1) {
             String root = args[0].toLowerCase(Locale.ROOT);
             if (ROOT_COMMANDS.contains(root) && !hasCommandPermission(sender, root)) {
-                msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
+                msgManager.send(sender, "command.no_permissions");
                 return true;
             }
 
@@ -84,7 +84,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
 
         if (!hasCommandPermission(sender, "help")) {
-            msgManager.sendConfigMessage(sender, "Messages.commandNoPermissions", true, null);
+            msgManager.send(sender, "command.no_permissions");
             return true;
         }
 
@@ -95,13 +95,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     public void reload(CommandSender sender, MessagesManager msgManager){
         VoiidCountdownTimer.getConfigsManager().reload();
-        msgManager.sendConfigMessage(sender, "Messages.commandReload", true, null);
+        msgManager.send(sender, "command.reload");
         Timer.refreshTimerText();
     }
 
     public void set(CommandSender sender, String[] args, MessagesManager msgManager){
         if (args.length < 2) {
-            msgManager.sendConfigMessage(sender, "Messages.timerSetError", true, null);
+            msgManager.send(sender, "timer.set.error");
             return;
         }
 
@@ -110,7 +110,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
         Timer timer = VCTActions.createTimer(timeHHMMSS, timerId, sender);
         if (timer == null) {
-            msgManager.sendConfigMessage(sender, "Messages.timerSetFormatIncorrect", true, null);
+            msgManager.send(sender, "timer.set.format_incorrect");
             return;
         }
 
@@ -119,17 +119,17 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         repl.put("%MM%", String.format("%02d", Integer.parseInt(timer.getTimeLeftMM())));
         repl.put("%SS%", String.format("%02d", Integer.parseInt(timer.getTimeLeftSS())));
 
-        msgManager.sendConfigMessage(sender, "Messages.timerStart", true, repl);
+        msgManager.send(sender, "timer.start", repl);
     }
 
     public void pause(CommandSender sender, MessagesManager msgManager){
         Timer timer = TimerManager.getInstance().getTimer();
         if (timer == null) {
-            msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+            msgManager.send(sender, "timer_status.not_exists");
             return;
         }
         timer.pause();
-        msgManager.sendConfigMessage(sender, "Messages.timerPause", true, null);
+        msgManager.send(sender, "timer.pause");
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.PAUSE, sender));
     }
@@ -137,11 +137,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     public void resume(CommandSender sender, MessagesManager msgManager){
         Timer timer = TimerManager.getInstance().getTimer();
         if (timer == null) {
-            msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+            msgManager.send(sender, "timer_status.not_exists");
             return;
         }
         timer.resume();
-        msgManager.sendConfigMessage(sender, "Messages.timerResume", true, null);
+        msgManager.send(sender, "timer.resume");
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.RESUME, sender));
     }
@@ -158,23 +158,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         int takeHours, takeMinutes, takeSeconds, totalSecondsToTake;
 
         if (args.length < 2) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Modifiers for the timer"));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &eadd &7- Add time to the timer."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &eset &7- Set time to the timer."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &etake &7- Take time to the timer."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ebossbar_color &7- Change the color of the bossbar."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ebossbar_style &7- Change the segments style of the bossbar."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &esound &7- Change the sound that plays each time a second is lowered."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &esound_enable &7- Toggle whether the sound should be played or not."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &esound_volume &7- Change the volume of the sound being played."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &esound_pitch &7- Change the pitch of the sound being played."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &etext &7- Change the text of the boss bar."));
+            msgManager.sendSection(sender, "timer.modify.help", true, null);
             return;
         }
 
         timer = TimerManager.getInstance().getTimer();
         if (timer == null) {
-            msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+            msgManager.send(sender, "timer_status.not_exists");
             return;
         }
 
@@ -182,7 +172,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         switch (modifier) {
             case "add":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyAddError", true, null);
+                    msgManager.send(sender, "timer.modify.add.error");
                     return;
                 }
 
@@ -197,18 +187,18 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 addSeconds = totalSecondsToAdd % 60;
 
                 if (addHours < 0 || addMinutes < 0 || addMinutes > 59 || addSeconds < 0 || addSeconds > 59) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerSetFormatIncorrect", true, null);
+                    msgManager.send(sender, "timer.set.format_incorrect");
                     return;
                 }
 
                 if (totalSecondsToAdd == 0) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerSetFormatOutRange", true, null);
+                    msgManager.send(sender, "timer.set.format_out_range");
                     return;
                 }
 
                 boolean addSuccess = VCTActions.modifyTimer("add", args[2], sender);
                 if (!addSuccess) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+                    msgManager.send(sender, "timer_status.not_exists");
                     return;
                 }
 
@@ -217,11 +207,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 addRepl.put("%MM%", String.format("%02d", addMinutes));
                 addRepl.put("%SS%", String.format("%02d", addSeconds));
 
-                msgManager.sendConfigMessage(sender, "Messages.timerModifyAdd", true, addRepl);
+                msgManager.send(sender, "timer.modify.add.success", addRepl);
                 return;
             case "set":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyTakeError", true, null);
+                    msgManager.send(sender, "timer.modify.set.error");
                     return;
                 }
 
@@ -236,13 +226,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 setSeconds = totalSecondsToSet % 60;
 
                 if (setHours < 0 || setMinutes < 0 || setMinutes > 59 || setSeconds < 0 || setSeconds > 59) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerSetFormatIncorrect", true, null);
+                    msgManager.send(sender, "timer.set.format_incorrect");
                     return;
                 }
 
                 boolean setSuccess = VCTActions.modifyTimer("set", args[2], sender);
                 if (!setSuccess) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+                    msgManager.send(sender, "timer_status.not_exists");
                     return;
                 }
 
@@ -251,11 +241,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 setRepl.put("%MM%", String.format("%02d", setMinutes));
                 setRepl.put("%SS%", String.format("%02d", setSeconds));
 
-                msgManager.sendConfigMessage(sender, "Messages.timerModifySet", true, setRepl);
+                msgManager.send(sender, "timer.modify.set.success", setRepl);
                 return;
             case "take":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyTakeError", true, null);
+                    msgManager.send(sender, "timer.modify.take.error");
                     return;
                 }
 
@@ -270,13 +260,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 takeSeconds = totalSecondsToTake % 60;
 
                 if (takeHours < 0 || takeMinutes < 0 || takeMinutes > 59 || takeSeconds < 0 || takeSeconds > 59) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerSetFormatIncorrect", true, null);
+                    msgManager.send(sender, "timer.set.format_incorrect");
                     return;
                 }
 
                 boolean takeSuccess = VCTActions.modifyTimer("take", args[2], sender);
                 if (!takeSuccess) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+                    msgManager.send(sender, "timer_status.not_exists");
                     return;
                 }
 
@@ -285,11 +275,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 takeRepl.put("%MM%", String.format("%02d", takeMinutes));
                 takeRepl.put("%SS%", String.format("%02d", takeSeconds));
 
-                msgManager.sendConfigMessage(sender, "Messages.timerModifyTake", true, takeRepl);
+                msgManager.send(sender, "timer.modify.take.success", takeRepl);
                 return;
             case "bossbar_color":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarcolorError", true, null);
+                    msgManager.send(sender, "timer.modify.bossbar_color.error");
                     return;
                 }
                 String colorName = args[2].toUpperCase();
@@ -301,17 +291,17 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     barcolorRepl.put("%TIMER%", timer.getTimerId());
                     barcolorRepl.put("%COLOR%", colorName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarcolor", true, barcolorRepl);
+                    msgManager.send(sender, "timer.modify.bossbar_color.success", barcolorRepl);
                 } else {
                     Map<String, String> barcolorInvRepl = new HashMap<>();
                     barcolorInvRepl.put("%COLOR%", colorName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarcolorInvalid", true, barcolorInvRepl);
+                    msgManager.send(sender, "timer.modify.bossbar_color.invalid", barcolorInvRepl);
                 }
                 return;
             case "bossbar_style":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarstyleError", true, null);
+                    msgManager.send(sender, "timer.modify.bossbar_style.error");
                     return;
                 }
                 String styleName = args[2].toUpperCase();
@@ -323,17 +313,17 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     barstyleRepl.put("%TIMER%", timer.getTimerId());
                     barstyleRepl.put("%STYLE%", styleName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarstyle", true, barstyleRepl);
+                    msgManager.send(sender, "timer.modify.bossbar_style.success", barstyleRepl);
                 } else {
                     Map<String, String> barstyleInvRepl = new HashMap<>();
                     barstyleInvRepl.put("%STYLE%", styleName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyBarstyleInvalid", true, barstyleInvRepl);
+                    msgManager.send(sender, "timer.modify.bossbar_style.invalid", barstyleInvRepl);
                 }
                 return;
             case "sound":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundError", true, null);
+                    msgManager.send(sender, "timer.modify.sound.error");
                     return;
                 }
 
@@ -346,7 +336,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 if (rawSound.startsWith("\"") && rawSound.endsWith("\"") && rawSound.length() >= 2) {
                     rawSound = rawSound.substring(1, rawSound.length() - 1).trim();
                 } else {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundRequireQuotes", true, null);
+                    msgManager.send(sender, "timer.modify.sound.require_quotes");
                     return;
                 }
 
@@ -367,14 +357,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     soundRepl.put("%SOUND%", rawSound);
                     soundRepl.put("%TYPE%", isVanillaSound ? "vanilla" : "custom");
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySound", true, soundRepl);
+                    msgManager.send(sender, "timer.modify.sound.success", soundRepl);
                 } else {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundError", true, null);
+                    msgManager.send(sender, "timer.modify.sound.error");
                 }
                 return;
             case "sound_enable":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundenableError", true, null);
+                    msgManager.send(sender, "timer.modify.sound_enable.error");
                     return;
                 }
 
@@ -387,14 +377,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     soundenableRepl.put("%TIMER%", timer.getTimerId());
                     soundenableRepl.put("%SOUNDENABLE%", value);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundenable", true, soundenableRepl);
+                    msgManager.send(sender, "timer.modify.sound_enable.success", soundenableRepl);
                 } else {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundenableInvalid", true, null);
+                    msgManager.send(sender, "timer.modify.sound_enable.invalid");
                 }
                 return;
             case "sound_volume":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundvolumeError", true, null);
+                    msgManager.send(sender, "timer.modify.sound_volume.error");
                     return;
                 }
 
@@ -402,12 +392,12 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 try {
                     newVolume = Float.parseFloat(args[2]);
                 } catch (NumberFormatException e) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundvolumeInvalid", true, null);
+                    msgManager.send(sender, "timer.modify.sound_volume.invalid");
                     return;
                 }
 
                 if (newVolume < 0.1f || newVolume > 2.0f) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundvolumeOutRange", true, null);
+                    msgManager.send(sender, "timer.modify.sound_volume.out_range");
                     return;
                 }
 
@@ -417,12 +407,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> repl = new HashMap<>();
                     repl.put("%TIMER%", timer.getTimerId());
                     repl.put("%VOLUME%", String.valueOf(newVolume));
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundvolume", true, repl);
+
+                    msgManager.send(sender, "timer.modify.sound_volume.success", repl);
                 }
                 return;
             case "sound_pitch":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundpitchError", true, null);
+                    msgManager.send(sender, "timer.modify.sound_pitch.error");
                     return;
                 }
 
@@ -430,12 +421,12 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 try {
                     newPitch = Float.parseFloat(args[2]);
                 } catch (NumberFormatException e) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundpitchInvalid", true, null);
+                    msgManager.send(sender, "timer.modify.sound_pitch.invalid");
                     return;
                 }
 
                 if (newPitch < 0.1f || newPitch > 2.0f) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundpitchOutRange", true, null);
+                    msgManager.send(sender, "timer.modify.sound_pitch.out_range");
                     return;
                 }
 
@@ -445,12 +436,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> repl = new HashMap<>();
                     repl.put("%TIMER%", timer.getTimerId());
                     repl.put("%PITCH%", String.valueOf(newPitch));
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifySoundpitch", true, repl);
+
+                    msgManager.send(sender, "timer.modify.sound_pitch.success", repl);
                 }
                 return;
             case "text":
                 if (args.length < 3) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyTextError", true, null);
+                    msgManager.send(sender, "timer.modify.text.error");
                     return;
                 }
 
@@ -463,7 +455,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 if (rawText.startsWith("\"") && rawText.endsWith("\"") && rawText.length() >= 2) {
                     rawText = rawText.substring(1, rawText.length() - 1);
                 } else {
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyTextRequireQuotes", true, null);
+                    msgManager.send(sender, "timer.modify.text.require_quotes");
                     return;
                 }
 
@@ -475,26 +467,23 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> repl = new HashMap<>();
                     repl.put("%TIMER%", timer.getTimerId());
                     repl.put("%TEXT%", rawText);
-                    msgManager.sendConfigMessage(sender, "Messages.timerModifyText", true, repl);
+
+                    msgManager.send(sender, "timer.modify.text.success", repl);
                 }
                 return;
         }
-        msgManager.sendConfigMessage(sender, "Messages.timerModifyInvalid", true, null);
+
+        msgManager.send(sender, "timer.modify.invalid");
     }
     
     private void expansion(CommandSender sender, String[] args, ExpansionManager expansionManager, MessagesManager msgManager) {
         if (expansionManager == null) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cExpansions are not enabled on this server."));
+            msgManager.send(sender, "expansion.disabled");
             return;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Options for expansions"));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &einfo &d<expansion_id> &7- Displays expansion information."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &eenable &d<expansion_id> &7- Enable an expansion."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &edisable &d<expansion_id> &7- Disable an expansion."));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ereload &d<expansion_id> &7- Reload an expansion"));
-            sender.sendMessage(MessagesManager.getColoredMessage("&6> &ereloadall &7- Reload all expansions."));
+            msgManager.sendSection(sender, "expansion.help", true, null);
             return;
         }
 
@@ -504,7 +493,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         switch (action) {
             case "info":
                 if (targetName == null) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
+                    msgManager.send(sender, "expansion.no_id_specified");
                     return;
                 }
 
@@ -513,26 +502,32 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionInfoNotFoundRepl = new HashMap<>();
                     expansionInfoNotFoundRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionInfoNotFoundRepl);
+                    msgManager.send(sender, "expansion.not_found", expansionInfoNotFoundRepl);
                     return;
                 }
 
                 boolean infoLoaded = expansionManager.isExpansionLoaded(infoMetadata.getName());
-                sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&7Expansión &d" + infoMetadata.getName() + "&7:"));
-                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Estado: " + (infoLoaded ? "&aHabilitada" : "&cDeshabilitada")));
-                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Versión: &f" + infoMetadata.getVersion()));
                 List<String> authors = infoMetadata.getAuthors();
                 String authorsText = authors.isEmpty() ? "N/A" : String.join("&7, &f", authors);
-                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Autores: &f" + authorsText));
                 String description = infoMetadata.getDescription();
+
                 if (description == null || description.trim().isEmpty()) {
-                    description = "Sin descripción.";
+                    description = "No description.";
                 }
-                sender.sendMessage(MessagesManager.getColoredMessage("&5> &7Descripción: &f" + description));
+
+                Map<String, String> repl = new HashMap<>();
+                repl.put("%EXPANSION%", infoMetadata.getName());
+                repl.put("%STATUS%", infoLoaded ? "Enabled" : "Disabled");
+                repl.put("%STATUSCOLOR%", infoLoaded ? "&a" : "&c");
+                repl.put("%AUTHORS%", authorsText);
+                repl.put("%VERSION%", infoMetadata.getVersion());
+                repl.put("%DESCRIPTION%", description);
+
+                msgManager.sendSection(sender, "expansion.info", true, repl);
                 return;
             case "enable":
                 if (targetName == null) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
+                    msgManager.send(sender, "expansion.no_id_specified");
                     return;
                 }
 
@@ -541,7 +536,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionEnableNotFoundRepl = new HashMap<>();
                     expansionEnableNotFoundRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionEnableNotFoundRepl);
+                    msgManager.send(sender, "expansion.not_found", expansionEnableNotFoundRepl);
                     return;
                 }
 
@@ -549,7 +544,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionEnableAlreadyEnabledRepl = new HashMap<>();
                     expansionEnableAlreadyEnabledRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnableAlreadyEnabled", true, expansionEnableAlreadyEnabledRepl);
+                    msgManager.send(sender, "expansion.enable.already_enabled", expansionEnableAlreadyEnabledRepl);
                     return;
                 }
 
@@ -557,17 +552,17 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionEnableRepl = new HashMap<>();
                     expansionEnableRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnable", true, expansionEnableRepl);
+                    msgManager.send(sender, "expansion.enable.success", expansionEnableRepl);
                 } else {
                     Map<String, String> expansionEnableErrorRepl = new HashMap<>();
                     expansionEnableErrorRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionEnableError", true, expansionEnableErrorRepl);
+                    msgManager.send(sender, "expansion.enable.error", expansionEnableErrorRepl);
                 }
                 return;
             case "disable":
                 if (targetName == null) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
+                    msgManager.send(sender, "expansion.no_id_specified");
                     return;
                 }
 
@@ -576,7 +571,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionDisableNotFoundRepl = new HashMap<>();
                     expansionDisableNotFoundRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionDisableNotFoundRepl);
+                    msgManager.send(sender, "expansion.not_found", expansionDisableNotFoundRepl);
                     return;
                 }
 
@@ -584,7 +579,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionDisableAlreadyDisabledRepl = new HashMap<>();
                     expansionDisableAlreadyDisabledRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisableAlreadyDisabled", true, expansionDisableAlreadyDisabledRepl);
+                    msgManager.send(sender, "expansion.disable.already_disabled", expansionDisableAlreadyDisabledRepl);
                     return;
                 }
 
@@ -592,17 +587,17 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionDisableRepl = new HashMap<>();
                     expansionDisableRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisable", true, expansionDisableRepl);
+                    msgManager.send(sender, "expansion.disable.success", expansionDisableRepl);
                 } else {
                     Map<String, String> expansionDisableErrorRepl = new HashMap<>();
                     expansionDisableErrorRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionDisableError", true, expansionDisableErrorRepl);
+                    msgManager.send(sender, "expansion.disable.error", expansionDisableErrorRepl);
                 }
                 return;
             case "reload":
                 if (targetName == null) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotSpecified", true, null);
+                    msgManager.send(sender, "expansion.no_id_specified");
                     return;
                 }
 
@@ -611,7 +606,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionReloadNotFoundRepl = new HashMap<>();
                     expansionReloadNotFoundRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionNotFound", true, expansionReloadNotFoundRepl);
+                    msgManager.send(sender, "expansion.not_found", expansionReloadNotFoundRepl);
                     return;
                 }
 
@@ -619,7 +614,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionReloadDisabledRepl = new HashMap<>();
                     expansionReloadDisabledRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadDisabled", true, expansionReloadDisabledRepl);
+                    msgManager.send(sender, "expansion.reload.disabled", expansionReloadDisabledRepl);
                     return;
                 }
 
@@ -627,45 +622,42 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Map<String, String> expansionReloadRepl = new HashMap<>();
                     expansionReloadRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReload", true, expansionReloadRepl);
+                    msgManager.send(sender, "expansion.reload.success", expansionReloadRepl);
                 } else {
                     Map<String, String> expansionReloadErrorRepl = new HashMap<>();
                     expansionReloadErrorRepl.put("%EXPANSION%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadError", true, expansionReloadErrorRepl);
+                    msgManager.send(sender, "expansion.reload.error", expansionReloadErrorRepl);
                 }
                 return;
             case "reloadall":
                 int reloaded = expansionManager.reloadAllExpansions();
                 if (reloaded == 0) {
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadallError", true, null);
+                    msgManager.send(sender, "expansion.reloadall.error");
                 } else {
                     Map<String, String> expansionReloadallRepl = new HashMap<>();
                     expansionReloadallRepl.put("%EXPANSIONS%", targetName);
 
-                    msgManager.sendConfigMessage(sender, "Messages.timerExpansionReloadall", true, expansionReloadallRepl);
+                    msgManager.send(sender, "expansion.reloadall.success", expansionReloadallRepl);
                 }
                 return;
             default:
-                msgManager.sendConfigMessage(sender, "Messages.timerExpansionInvalid", true, null);
+                msgManager.send(sender, "expansion.reloadall.invalid");
         }
     }
 
     public void help(CommandSender sender){
-        sender.sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix +"&7Running &dVoiid Countdown Timer &ev"+VoiidCountdownTimer.getInstance().getDescription().getVersion()));
-        sendHelpLine(sender, "help", "&5> &6/vct help &7- Shows this message.");
-        sendHelpLine(sender, "reload", "&5> &6/vct reload &7- Reloads the config.");
-        sendHelpLine(sender, "set", "&5> &6/vct set &e<HH:MM:SS> &7- Set the timer.");
-        sendHelpLine(sender, "pause", "&5> &6/vct pause &7- Pause the timer.");
-        sendHelpLine(sender, "resume", "&5> &6/vct resume &7- Resume the timer.");
-        sendHelpLine(sender, "stop", "&5> &6/vct stop &7- Stop the timer.");
-        sendHelpLine(sender, "modify", "&5> &6/vct modify &e<modifier> &7- Modify the timer.");
-        sendHelpLine(sender, "expansion", "&5> &6/vct expansion &7- Manage installed expansions.");
+        Map<String, String> repl = new HashMap<>();
+        repl.put("%VERSION%", VoiidCountdownTimer.getInstance().getDescription().getVersion());
+
+        VoiidCountdownTimer.getMessagesManager().sendSection(sender, "command.help", true, repl);
 
         ExpansionManager expansionManager = VoiidCountdownTimer.getExpansionManager();
         if (expansionManager != null) {
             for (String line : expansionManager.getHelpLines()) {
-                sender.sendMessage(MessagesManager.getColoredMessage(line));
+                sender.sendMessage(
+                        VoiidCountdownTimer.getMessagesManager().color(line)
+                );
             }
         }
     }
@@ -789,13 +781,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
 
         return null;
-    }
-
-    private void sendHelpLine(CommandSender sender, String commandKey, String message) {
-        if (!hasCommandPermission(sender, commandKey)) {
-            return;
-        }
-        sender.sendMessage(MessagesManager.getColoredMessage(message));
     }
 
     private boolean hasCommandPermission(CommandSender sender, String commandKey) {

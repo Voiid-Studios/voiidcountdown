@@ -1,4 +1,6 @@
 Config:
+  # ...
+  language: en_US
   # The plugin will attempt to auto-update when it finds a new version.
   auto_update: false
   # The plugin will send an update notification when it finds a new version if auto-update is disabled.
@@ -15,65 +17,8 @@ Config:
   refresh_ticks: 10
   # Should the plugin save and load the timer states when the server is closed and opened?
   save_state_timers: true
-
-Messages:
-  commandReload: '&aConfig Reloaded.'
-  commandNoPermissions: '&cYou don''t have permissions to use this command.'
-  timerSetError: '&cUse: /vct set <HH:MM:SS> <timer_id>'
-  timerSetFormatIncorrect: '&cIncorrect format. Please use HH:MM:SS'
-  timerSetFormatInvalid: '&cThe format does not contain a valid number.'
-  timerSetFormatOutRange: '&cThe timer must be greater than 0 seconds.'
-  timerModifyInvalid: '&cUse: /vct modify <modifier>'
-  timerModifyAddError: '&cUse: /vct modify add <HH:MM:SS>'
-  timerModifyAdd: '&a%HH%:%MM%:%SS% has been added to the timer.'
-  timerModifySetError: '&cUse: /vct modify set <HH:MM:SS>'
-  timerModifySet: '&aThe timer was set to %HH%:%MM%:%SS%.'
-  timerModifyTakeError: '&cUse: /vct modify take <HH:MM:SS>'
-  timerModifyTake: '&a%HH%:%MM%:%SS% has been removed from the timer.'
-  timerModifyBarcolorError: '&cUse: /vct modify bossbar_color <color>. &eYou can use these colors: BLUE, GREEN, PINK, PURPLE, RED, WHITE, or YELLOW.'
-  timerModifyBarcolorInvalid: '&cThe color "%COLOR%" of the timer boss bar is invalid. Use BLUE, GREEN, PINK, PURPLE, RED, WHITE, or YELLOW.'
-  timerModifyBarcolor: '&aThe color of the timer %TIMER% has been changed to "%COLOR%".'
-  timerModifyBarstyleError: '&cUse: /vct modify bossbar_style <style>. &eYou can use these styles: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, or SEGMENTED_20.'
-  timerModifyBarstyleInvalid: '&cThe style "%STYLE%" of the timer boss bar is invalid. Use SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, or SEGMENTED_20.'
-  timerModifyBarstyle: '&aThe style of the timer %TIMER% has been changed to "%STYLE%".'
-  timerModifySoundError: '&cUse: /vct modify sound <"sound in quotes">'
-  timerModifySoundRequireQuotes: '&cThe sound needs to be enclosed in quotation marks (") in order to change it.'
-  timerModifySound: '&aThe sound of the timer %TIMER% has been changed to "%SOUND%" &e(%TYPE%)&a.'
-  timerModifySoundenableError: '&cUse: /vct modify sound_enable <true|false>'
-  timerModifySoundenableInvalid: '&cThe boolean is invalid. Use TRUE or FALSE.'
-  timerModifySoundenable: '&aThe sound_enable of the timer %TIMER% has been changed to %SOUNDENABLE%.'
-  timerModifySoundvolumeError: '&cUse: /vct modify sound_volume <0.1 - 2.0>'
-  timerModifySoundvolumeInvalid: '&cThe number is invalid. Please use a number between &e0.1 &cand &e2.0.'
-  timerModifySoundvolumeOutRange: '&cThe volume must be between &e0.1 &cand &e2.0&c.'
-  timerModifySoundvolume: '&aThe sound_volume of the timer %TIMER% has been changed to &e%VOLUME%&a.'
-  timerModifySoundpitchError: '&cUse: /vct modify sound_pitch <0.1 - 2.0>'
-  timerModifySoundpitchInvalid: '&cThe number is invalid. Please use a number between &e0.1 &cand &e2.0.'
-  timerModifySoundpitchOutRange: '&cThe pitch must be between &e0.1 &cand &e2.0&c.'
-  timerModifySoundpitch: '&aThe sound_pitch of the timer %TIMER% has been changed to &e%PITCH%&a.'
-  timerModifyTextError: '&cUse: /vct modify text <"text in quotes">'
-  timerModifyTextRequireQuotes: '&cThe text needs to be enclosed in quotation marks (") in order to change it.'
-  timerModifyText: '&aThe text of the timer %TIMER% has been changed to "&r%TEXT%&a".'
-  timerExpansionInvalid: '&cUse: /vct expansion <info|enable|disable|reload|reloadall> <expansion_id>'
-  timerExpansionDisabled: '&cExpansions are not enabled on this server.'
-  timerExpansionNotSpecified: '&cYou must specify the id of the expansion.'
-  timerExpansionNotFound: '&cThe &e%EXPANSION% &cexpansion could not be found.'
-  timerExpansionEnableAlreadyEnabled: '&cThe &e%EXPANSION% &cextension is already enabled.'
-  timerExpansionEnableError: '&cAn error occurred while attempting to enable the &e%EXPANSION% &cextension. Check the console for more details.'
-  timerExpansionEnable: '&aThe &e%EXPANSION% &aexpansion has been enabled.'
-  timerExpansionDisableAlreadyDisabled: '&cThe &e%EXPANSION% &cextension is already disabled.'
-  timerExpansionDisableError: '&cAn error occurred while attempting to disable the &e%EXPANSION% &cextension. Check the console for more details.'
-  timerExpansionDisable: '&aThe &e%EXPANSION% &aexpansion has been disabled.'
-  timerExpansionReloadDisabled: '&cThe &e%EXPANSION% &cextension is not enabled. Please enable it with &e/vct expansion enable &cto reload it.'
-  timerExpansionReloadError: '&cAn error occurred while attempting to reload the &e%EXPANSION% &cextension. Check the console for more details.'
-  timerExpansionReload: '&aThe &e%EXPANSION% &aexpansion has been reloaded.'
-  timerExpansionReloadallError: '&cNo expansion was reloaded. Verify that valid expansions exist.'
-  timerExpansionReloadall: '&a%EXPANSIONS% expansions were reloaded.'
-  timerStart: '&aTimer started of %HH%:%MM%:%SS%!'
-  timerPause: '&6Timer paused!'
-  timerResume: '&6Timer resumed!'
-  timerStop: '&6Timer stopped!'
-  timerDontExists: '&cThe timer does not exist.'
-  timerConfigNotFound: '&cThe timer configuration could not be found.'
+  # Enables additional debug logs in console to help diagnose issues.
+  debug_mode: false
 
 Timers:
   default:

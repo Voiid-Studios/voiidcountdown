@@ -48,11 +48,11 @@ public class TimerManager {
             this.timer = null;
 
             if (sender != null) {
-                msgManager.sendConfigMessage(sender, "Messages.timerStop", true, null);
+                msgManager.send(sender, "timer_status.stop");
             }
         } else {
             if (sender != null) {
-                msgManager.sendConfigMessage(sender, "Messages.timerDontExists", true, null);
+                msgManager.send(sender, "timer_status.not_exists");
             }
         }
     }
