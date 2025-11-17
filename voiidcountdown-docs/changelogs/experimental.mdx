@@ -9,6 +9,64 @@ As always, if any bugs come up, [open an issue](https://github.com/Voiid-Studios
 
 ❤️ Support the project on [Ko-fi](https://ko-fi.com/maxxvoiid) :)
 
+<Update label="November 17" tags={["RELEASE CANDIDATE", "Features", "Improvements", "Compatibility"]}>
+
+## 2.1.0 PLUGIN Release Candidate 1 for Java 1.13 - 1.21.10.
+Compatible with Bukkit, Spigot, Paper, Purpur & Folia (EXPERIMENTAL)
+
+## Compatibility
+
+- Verified compatibility with Folia (still experimental).
+
+## New Features
+
+### **Modular Translation System**
+A complete replacement of the old `Messages:` block in `config.yml`.
+
+- New folders:
+  - `/core/messages/origins/` -> default language files  
+  - `/core/messages/custom/` -> user overrides  
+- Automatic synchronization of missing keys.  
+- Supports:
+  - single messages  
+  - lists (`lines:`)  
+  - sections (`header:` + `lines:`)  
+- Everything visible **inside Minecraft** is now translatable.
+
+A legacy config warning will appear if the old `Messages:` section is still present.
+
+### **Expansion System**
+VCT now supports first-party and custom expansions using a clean API.
+
+- New commands:
+  - `/vct expansion info <id>`
+  - `/vct expansion enable <id>`
+  - `/vct expansion disable <id>`
+  - `/vct expansion reload <id>`
+  - `/vct expansion reloadall`
+- Expansions include metadata, help sections, and isolated configuration.
+
+The new official VCT expansions are in the works, so stay tuned for our announcements! 👀
+
+## Improvements
+
+- Major internal cleanup & refactor of the command system.  
+- Rewrote help menus to use the new translation structure.  
+- Unified message formatting across commands & expansions.  
+- Improved auto-updater messages and reduced duplicated logs.  
+- Improved structure of config loading for timers & core folders.
+
+## Bug fixes
+
+- Fixed missing translation keys not being created on first load.  
+- Fixed issues with list-based translations showing incorrectly.  
+- Fixed rare startup errors caused by load order.  
+- Fixed multiple formatting inconsistencies across commands.
+
+### [Modrinth Release: v2.1.0-rc1](https://modrinth.com/datapack/voiid-countdown-timer/version/2.1.0-rc1)
+
+</Update>
+
 <Update label="October 20" tags={["ALPHA", "Features"]}>
 
 ## 2.1.0 PLUGIN Alpha 2 for Java 1.13 - 1.21.10.
