@@ -9,6 +9,8 @@ import voiidstudios.vct.api.update.UpdateCheckerResult;
 import voiidstudios.vct.api.update.UpdateDownloaderGithub;
 import voiidstudios.vct.commands.MainCommand;
 import voiidstudios.vct.configs.ConfigsManager;
+import voiidstudios.vct.configs.MainConfigManager;
+import voiidstudios.vct.expansions.ExpansionManager;
 import voiidstudios.vct.listeners.PlayerListener;
 import voiidstudios.vct.managers.DependencyManager;
 import voiidstudios.vct.managers.DynamicsManager;
@@ -19,7 +21,10 @@ import voiidstudios.vct.utils.ServerVersion;
 
 public final class VoiidCountdownTimer extends JavaPlugin {
     public static String prefix = "&5[&dVCT&5] ";
+    public static String prefixLogger = "§5[§dVCT§5] ";
     public String version = getDescription().getVersion();
+
+    private static final String VCT_LOADED_PROPERTY = "vct.jvm.loaded";
 
     private final String serverName = Bukkit.getServer().getName();
     private final String bukkitVersion = Bukkit.getBukkitVersion();
@@ -33,12 +38,30 @@ public final class VoiidCountdownTimer extends JavaPlugin {
     private static MessagesManager messagesManager;
     private static TimerStateManager timerStateManager;
     private static DependencyManager dependencyManager;
+    private static ExpansionManager expansionManager;
 
     public void onEnable() {
         instance = this;
+
+        if (Boolean.getBoolean(VCT_LOADED_PROPERTY)) {
+            sendConsoleUnstableReloadMessage();
+        } else {
+            System.setProperty(VCT_LOADED_PROPERTY, "true");
+        }
+
         configsManager = new ConfigsManager(this);
-        messagesManager = new MessagesManager(this);
         configsManager.configure();
+
+        if (configsManager.getMainConfigManager().getConfig().contains("Messages")) {
+            sendConsoleLegacyMessagesConfigMessage();
+        }
+
+        messagesManager = new MessagesManager(this);
+        MessagesManager.setPrefix(prefix);
+        messagesManager.loadLanguage(
+                configsManager.getMainConfigManager().getLanguage()
+        );
+        
         setVersion();
         registerCommands();
         registerEvents();
@@ -47,12 +70,10 @@ public final class VoiidCountdownTimer extends JavaPlugin {
             new PAPIExpansion(this).register();
         }
 
-        MessagesManager.setPrefix(prefix);
-
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&6        __ ___"));
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&5  \\  / &6|    |    &dVoiid &eCountdown Timer"));
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&5   \\/  &6|__  |    &8Running v" + version + " on " + serverName + " (" + cleanVersion + ")"));
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(""));
+        messagesManager.console("&6        __ ___");
+        messagesManager.console("&5  \\  / &6|    |    &dVoiid &eCountdown Timer");
+        messagesManager.console("&5   \\/  &6|__  |    &8Running v" + version + " on " + serverName + " (" + cleanVersion + ")");
+        messagesManager.console("");
 
         new Metrics(this, 26790);
         dependencyManager = new DependencyManager(this);
@@ -63,6 +84,9 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
         timerStateManager = new TimerStateManager(this);
         timerStateManager.loadState();
+
+        expansionManager = new ExpansionManager(this);
+        expansionManager.loadExpansions();
     }
 
     public void onDisable() {
@@ -70,9 +94,11 @@ public final class VoiidCountdownTimer extends JavaPlugin {
             timerStateManager.saveState();
         }
 
-        Bukkit.getConsoleSender().sendMessage(
-                MessagesManager.getColoredMessage(prefix+"&aHas been disabled! Goodbye ;)")
-        );
+        if (expansionManager != null) {
+            expansionManager.shutdown();
+        }
+
+        messagesManager.console(prefix+"&aHas been disabled! Goodbye ;)");
     }
 
     public void setVersion(){
@@ -101,11 +127,15 @@ public final class VoiidCountdownTimer extends JavaPlugin {
             case "1.21.8":
                 serverVersion = ServerVersion.v1_21_R5;
                 break;
+			case "1.21.9":
+			case "1.21.10":
+				serverVersion = ServerVersion.v1_21_R6;
+				break;
             default:
                 try{
                     serverVersion = ServerVersion.valueOf(packageName.replace("org.bukkit.craftbukkit.", ""));
                 }catch(Exception e){
-                    serverVersion = ServerVersion.v1_21_R5;
+                    serverVersion = ServerVersion.v1_21_R6;
                 }
         }
     }
@@ -134,7 +164,7 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
             if (configsManager.getMainConfigManager().isAuto_update()) {
                 if (latestVersion != null && !latestVersion.equalsIgnoreCase(version)) {
-                    Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&bAn stable update for Voiid Countdown Timer &e("+latestVersion+") &bis available. Downloading shortly..."));
+                    messagesManager.console("&bAn stable update for Voiid Countdown Timer &e("+latestVersion+") &bis available. Downloading shortly...");
 
                     if (ServerCompatibility.isFolia()) {
                         Bukkit.getGlobalRegionScheduler().runDelayed(this, scheduledTask -> UpdateDownloaderGithub.downloadUpdate(), 2L);
@@ -144,15 +174,33 @@ public final class VoiidCountdownTimer extends JavaPlugin {
                 }
             }
         }else{
-            if (configsManager.getMainConfigManager().isUpdate_notification() && !configsManager.getMainConfigManager().isAuto_update()) Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(prefix+"&cAn error occurred while checking for updates."));
+            if (configsManager.getMainConfigManager().isUpdate_notification() && !configsManager.getMainConfigManager().isAuto_update()) messagesManager.console(prefix+"&cAn error occurred while checking for updates.");
         }
     }
 
     public void sendConsoleUpdateMessage(String latestVersion){
         if(latestVersion != null){
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&bAn stable update for Voiid Countdown Timer &e("+latestVersion+") &bis available."));
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage("&bYou can download it at: &fhttps://modrinth.com/datapack/voiid-countdown-timer"));
+            messagesManager.console("&bAn stable update for Voiid Countdown Timer &e("+latestVersion+") &bis available.");
+            messagesManager.console("&bYou can download it at: &fhttps://modrinth.com/datapack/voiid-countdown-timer");
         }
+    }
+
+    public void sendConsoleUnstableReloadMessage(){
+        getLogger().severe("Server reload detected. This action is NOT supported and may break VCT and ALL dependent plugins! Please restart your server properly.");
+    }
+
+    public void sendConsoleLegacyMessagesConfigMessage(){
+        getLogger().warning("=====================================");
+        getLogger().warning(" Voiid Countdown Timer - Nobelium 2.1.0 Update");
+        getLogger().warning(" Legacy 'Messages:' section detected in config.yml");
+        getLogger().warning(" This section is no longer used.");
+        getLogger().warning(" All messages are now handled through:");
+        getLogger().warning("   /core/messages/origins/");
+        getLogger().warning("   /core/messages/custom/");
+        getLogger().warning("");
+        getLogger().warning(" Delete the entire 'Messages' section in config.yml");
+        getLogger().warning(" so that this message no longer appears.");
+        getLogger().warning("=====================================");
     }
 
     public static ConfigsManager getConfigsManager() {
@@ -173,5 +221,9 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
     public static TimerStateManager getTimerStateManager() {
         return timerStateManager;
+    }
+
+    public static ExpansionManager getExpansionManager() {
+        return expansionManager;
     }
 }

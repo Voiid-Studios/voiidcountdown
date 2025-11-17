@@ -1,0 +1,152 @@
+# ====== GENERIC COMMANDS ======
+command:
+  reload: "&aConfig Reloaded."
+  no_permissions: "&cYou don't have permissions to use this command."
+  help:
+    header: "&7Running &dVoiid Countdown Timer &ev%VERSION%"
+    lines:
+      - "&5> &6/vct help &7- Shows this message."
+      - "&5> &6/vct reload &7- Reloads the config."
+      - "&5> &6/vct set &e<HH:MM:SS> &7- Set the timer."
+      - "&5> &6/vct pause &7- Pause the timer."
+      - "&5> &6/vct resume &7- Resume the timer."
+      - "&5> &6/vct stop &7- Stop the timer."
+      - "&5> &6/vct modify &e<modifier> &7- Modify the timer."
+      - "&5> &6/vct expansion &7- Manage installed expansions."
+
+# ====== TIMER SET ======
+timer:
+  set:
+    error: "&cUse: /vct set <HH:MM:SS> <timer_id>"
+    format_incorrect: "&cIncorrect format. Please use HH:MM:SS"
+    format_invalid: "&cThe format does not contain a valid number."
+    format_out_range: "&cThe timer must be greater than 0 seconds."
+
+  # ====== TIMER MODIFY ======
+  modify:
+    invalid: "&cUse: /vct modify <modifier>"
+
+    help:
+      header: "&7Modifiers for the timer"
+      lines:
+        - "&6> &eadd &7- Add time to the timer."
+        - "&6> &eset &7- Set the timer."
+        - "&6> &etake &7- Take time from the timer."
+        - "&6> &ebossbar_color &7- Change the color of the bossbar."
+        - "&6> &ebossbar_style &7- Change the segments style of the bossbar."
+        - "&6> &esound &7- Change the sound that plays each time a second is lowered."
+        - "&6> &esound_enable &7- Toggle whether the sound should be played or not."
+        - "&6> &esound_volume &7- Change the volume of the sound being played."
+        - "&6> &esound_pitch &7- Change the pitch of the sound being played."
+        - "&6> &etext &7- Change the text of the boss bar."
+
+    add:
+      error: "&cUse: /vct modify add <HH:MM:SS>"
+      success: "&a%HH%:%MM%:%SS% has been added to the timer."
+
+    set:
+      error: "&cUse: /vct modify set <HH:MM:SS>"
+      success: "&aThe timer was set to %HH%:%MM%:%SS%."
+
+    take:
+      error: "&cUse: /vct modify take <HH:MM:SS>"
+      success: "&a%HH%:%MM%:%SS% has been removed from the timer."
+
+    bossbar_color:
+      error: "&cUse: /vct modify bossbar_color <color>. &eYou can use these colors: BLUE, GREEN, PINK, PURPLE, RED, WHITE, or YELLOW."
+      invalid: "&cThe color \"%COLOR%\" of the timer boss bar is invalid. Use BLUE, GREEN, PINK, PURPLE, RED, WHITE, or YELLOW."
+      success: "&aThe color of the timer %TIMER% has been changed to \"%COLOR%\"."
+
+    bossbar_style:
+      error: "&cUse: /vct modify bossbar_style <style>. &eYou can use these styles: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, or SEGMENTED_20."
+      invalid: "&cThe style \"%STYLE%\" of the timer boss bar is invalid. Use SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, or SEGMENTED_20."
+      success: "&aThe style of the timer %TIMER% has been changed to \"%STYLE%\"."
+
+    sound:
+      error: "&cUse: /vct modify sound <\"sound in quotes\">"
+      require_quotes: "&cThe sound needs to be enclosed in quotation marks (\") in order to change it."
+      success: "&aThe sound of the timer %TIMER% has been changed to \"%SOUND%\" &e(%TYPE%)&a."
+
+    sound_enable:
+      error: "&cUse: /vct modify sound_enable <true|false>"
+      invalid: "&cThe boolean is invalid. Use TRUE or FALSE."
+      success: "&aThe sound_enable of the timer %TIMER% has been changed to %SOUNDENABLE%."
+
+    sound_volume:
+      error: "&cUse: /vct modify sound_volume <0.1 - 2.0>"
+      invalid: "&cThe number is invalid. Please use a number between &e0.1 &cand &e2.0."
+      out_range: "&cThe volume must be between &e0.1 &cand &e2.0&c."
+      success: "&aThe sound_volume of the timer %TIMER% has been changed to &e%VOLUME%&a."
+
+    sound_pitch:
+      error: "&cUse: /vct modify sound_pitch <0.1 - 2.0>"
+      invalid: "&cThe number is invalid. Please use a number between &e0.1 &cand &e2.0."
+      out_range: "&cThe pitch must be between &e0.1 &cand &e2.0&c."
+      success: "&aThe sound_pitch of the timer %TIMER% has been changed to &e%PITCH%&a."
+
+    text:
+      error: "&cUse: /vct modify text <\"text in quotes\">"
+      require_quotes: "&cThe text needs to be enclosed in quotation marks (\") in order to change it."
+      success: "&aThe text of the timer %TIMER% has been changed to \"&r%TEXT%&a\"."
+
+# ====== EXPANSIONS ======
+expansion:
+  invalid: "&cUse: /vct expansion <info|enable|disable|reload|reloadall> <expansion_id>"
+  disabled: "&cExpansions are not enabled on this server."
+  no_id_specified: "&cYou must specify the id of the expansion."
+  not_found: "&cThe &e%EXPANSION% &cexpansion could not be found."
+  
+  help:
+    header: "&7Options for expansions"
+    lines:
+      - "&6> &einfo &7- Displays expansion information."
+      - "&6> &eenable &7- Enable an expansion."
+      - "&6> &edisable &7- Disable an expansion."
+      - "&6> &ereload &7- Reload an expansion"
+      - "&6> &ereloadall &7- Reload all expansions."
+
+  info:
+    header: "&7Expansion info for: &d%EXPANSION%"
+    lines:
+      - "&5> &7Status: %STATUSCOLOR%%STATUS%"
+      - "&5> &7Authors: &f%AUTHORS%"
+      - "&5> &7Version: &f%VERSION%"
+      - "&5> &7Description: &f%DESCRIPTION%"
+
+  enable:
+    already_enabled: "&cThe &e%EXPANSION% &cextension is already enabled."
+    error: "&cAn error occurred while attempting to enable the &e%EXPANSION% &cextension. Check the console for more details."
+    success: "&aThe &e%EXPANSION% &aexpansion has been enabled."
+
+  disable:
+    already_disabled: "&cThe &e%EXPANSION% &cextension is already disabled."
+    error: "&cAn error occurred while attempting to disable the &e%EXPANSION% &cextension. Check the console for more details."
+    success: "&aThe &e%EXPANSION% &aexpansion has been disabled."
+
+  reload:
+    disabled: "&cThe &e%EXPANSION% &cextension is not enabled. Please enable it with /vct expansion enable to reload it."
+    error: "&cAn error occurred while attempting to reload the &e%EXPANSION% &cextension. Check the console for more details."
+    success: "&aThe &e%EXPANSION% &aexpansion has been reloaded."
+
+  reloadall:
+    error: "&cNo expansion was reloaded. Verify that valid expansions exist."
+    success: "&a%EXPANSIONS% expansions were reloaded."
+
+  expansion_command:
+    error: "&cAn error occurred while executing the expansion command. Check the console for more details."
+
+# ====== TIMER STATUS ======
+timer_status:
+  start: "&aTimer started of %HH%:%MM%:%SS%!"
+  pause: "&6Timer paused!"
+  resume: "&6Timer resumed!"
+  stop: "&6Timer stopped!"
+  not_exists: "&cThe timer does not exist."
+  config_not_found: "&cThe timer configuration could not be found."
+
+# ====== SYSTEM ======
+system:
+  update:
+    available:
+      - "&bA stable update for Voiid Countdown Timer &e(%LATEST%) &bis available."
+      - "&bYou can download it at: &a%UPDATELINK%"

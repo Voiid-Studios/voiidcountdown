@@ -72,7 +72,7 @@ public class VCTActions {
         TimerConfig timerCfg = VoiidCountdownTimer.getConfigsManager().getTimerConfig(timer.getTimerId());
         if (timerCfg == null) {
             if(sender != null) {
-                msgManager.sendConfigMessage(sender, "Messages.timerConfigNotFound", true, null);
+                msgManager.send(sender, "timer_status.config_not_found");
             }
             return false;
         }

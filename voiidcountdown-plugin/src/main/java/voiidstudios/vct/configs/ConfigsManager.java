@@ -14,14 +14,17 @@ import java.util.Map;
 public class ConfigsManager {
     private final MainConfigManager mainConfigManager;
     private final TimersFolderConfigManager timerFolderConfigManager;
+    private final CoreFolderConfigManager coreFolderConfigManager;
     private final Map<String, TimerConfig> timersConfigs = new LinkedHashMap<>();
 
     public ConfigsManager(VoiidCountdownTimer plugin){
         this.mainConfigManager = new MainConfigManager(plugin);
         this.timerFolderConfigManager = new TimersFolderConfigManager(plugin, "timers");
+        this.coreFolderConfigManager = new CoreFolderConfigManager(plugin, "core");
     }
 
     public void configure(){
+        coreFolderConfigManager.configure();
         mainConfigManager.configure();
         timerFolderConfigManager.configure();
         configureTimers();

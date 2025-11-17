@@ -62,6 +62,8 @@ public class UpdateDownloaderGithub {
     }
 
     public static boolean downloadUpdate() {
+        MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
+
         try {
             JsonObject release = getLatestReleaseJson();
             String downloadUrl = getDownloadUrlFromJson(release);
@@ -72,18 +74,20 @@ public class UpdateDownloaderGithub {
 
             if (downloadUrl == null) return false;
 
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&bDownloading latest stable update..."));
+            msgManager.console(VoiidCountdownTimer.prefix + "&bDownloading latest stable update...");
+
+            msgManager.console(VoiidCountdownTimer.prefix + "&bDownloading latest stable update...");
 
             long start = System.currentTimeMillis();
             download(downloadUrl);
 
             long elapsed = System.currentTimeMillis() - start;
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aDownloaded update in " + elapsed + "ms"));
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&aVoiid Countdown Timer will be updated from &c" + currentVersion + " &a-> &e" + latestVersion +" &aon the next server restart!"));
+            msgManager.console(VoiidCountdownTimer.prefix + "&aDownloaded update in " + elapsed + "ms");
+            msgManager.console(VoiidCountdownTimer.prefix + "&aVoiid Countdown Timer will be updated from &c" + currentVersion + " &a-> &e" + latestVersion +" &aon the next server restart!");
 
             return true;
         } catch (Exception ex) {
-            Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix + "&cFailed to download update: " + ex.getMessage()));
+            msgManager.console(VoiidCountdownTimer.prefix + "&cFailed to download update: " + ex.getMessage());
             return false;
         }
     }
