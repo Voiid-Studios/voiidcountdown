@@ -84,7 +84,7 @@
             "group": "Changelog",
             "pages": [
               "changelogs/stable",
-              "changelogs/beta"
+              "changelogs/experimental"
             ]
           }
         ]
