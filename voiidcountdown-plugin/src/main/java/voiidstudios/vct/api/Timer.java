@@ -10,12 +10,15 @@ import org.bukkit.scheduler.BukkitTask;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import voiidstudios.vct.VoiidCountdownTimer;
+import voiidstudios.vct.managers.MessagesManager;
 import voiidstudios.vct.managers.TimerManager;
 import voiidstudios.vct.utils.Formatter;
 import voiidstudios.vct.utils.ServerCompatibility;
 import voiidstudios.vct.configs.model.TimerConfig;
 
 public class Timer implements Runnable {
+    private final MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
+
     private int seconds;
     private final BossBar bossbar;
     private Object task;
@@ -23,6 +26,7 @@ public class Timer implements Runnable {
     private String soundFinalName;
     public float soundVolume;
     public float soundPitch;
+    private final String format;
     private String timerText;
     private int initialSeconds;
     private int refreshInterval;
@@ -30,10 +34,11 @@ public class Timer implements Runnable {
     private final int minValue = 0;
     private final String timerId;
 
-    public Timer(int seconds, String timeText, String timeSound, BarColor barcolor, BarStyle barstyle, String timerId, boolean hasSoundd, float soundVolumee, float soundPitchh) {
+    public Timer(int seconds, String timeText, String timeSound, BarColor barcolor, BarStyle barstyle, String format, String timerId, boolean hasSoundd, float soundVolumee, float soundPitchh) {
         this.seconds = seconds;
         this.initialSeconds = seconds;
         this.timerId = timerId;
+        this.format = format;
 
         this.refreshInterval = VoiidCountdownTimer.getConfigsManager().getMainConfigManager().getRefresh_ticks();
         this.hasSound = hasSoundd;
@@ -295,6 +300,10 @@ public class Timer implements Runnable {
         return timerId;
     }
 
+    public String getFormat() {
+        return format;
+    }
+
     public String getInitialTime() {
         return formatTime(this.initialSeconds);
     }
@@ -348,6 +357,11 @@ public class Timer implements Runnable {
     }
 
     public void start() {
+        if (!"COUNTDOWN".equals(format)) {
+            msgManager.debug("The timer chosen in the format " + format + ", VCT vanilla will NOT manage how that timer works, and external extensions will have to do so");
+            msgManager.debug("If you want VCT vanilla to handle that timer as it normally does, use the COUNTDOWN format");
+            return;
+        }
         if (task != null) {
             stop();
         }
@@ -401,10 +415,14 @@ public class Timer implements Runnable {
     }
 
     public void pause() {
+        if (!"COUNTDOWN".equals(format)) {
+            return;
+        }
         stop();
     }
 
     public void resume() {
+        if (!"COUNTDOWN".equals(format)) return;
         if (this.task == null) startTask(this.seconds);
     }
 

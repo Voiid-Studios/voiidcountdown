@@ -54,7 +54,7 @@ public class TranslationManager {
                 changed = true;
 
                 plugin.getLogger().warning(
-                        "[VCT] Added missing translation key to " + currentLang + ": " + key
+                        "Added missing translation key to " + currentLang + ": " + key
                 );
             }
         }

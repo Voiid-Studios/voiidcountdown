@@ -119,7 +119,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         repl.put("%MM%", String.format("%02d", Integer.parseInt(timer.getTimeLeftMM())));
         repl.put("%SS%", String.format("%02d", Integer.parseInt(timer.getTimeLeftSS())));
 
-        msgManager.send(sender, "timer.start", repl);
+        msgManager.send(sender, "timer_status.start", repl);
     }
 
     public void pause(CommandSender sender, MessagesManager msgManager){
@@ -129,7 +129,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return;
         }
         timer.pause();
-        msgManager.send(sender, "timer.pause");
+        msgManager.send(sender, "timer_status.pause");
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.PAUSE, sender));
     }
@@ -141,7 +141,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return;
         }
         timer.resume();
-        msgManager.send(sender, "timer.resume");
+        msgManager.send(sender, "timer_status.resume");
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.RESUME, sender));
     }

@@ -1,5 +1,6 @@
 package voiidstudios.vct.managers;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import voiidstudios.vct.VoiidCountdownTimer;
@@ -63,6 +64,7 @@ public class TimerStateManager {
                 settings.sound,
                 settings.color,
                 settings.style,
+                settings.format,
                 usedId,
                 settings.hasSound,
                 settings.volume,
@@ -73,9 +75,13 @@ public class TimerStateManager {
         timer.setSeconds(remaining);
         TimerManager.getInstance().setTimer(timer);
 
-        msgManager.console(VoiidCountdownTimer.prefix+"&aLoaded the state of timer " + savedId + " &e(" + remaining + "/" + initial + " seconds | Paused: " + paused + ")");
+        if ("COUNTDOWN".equals(settings.format)) {
+            msgManager.console(VoiidCountdownTimer.prefix+"&aLoaded the state of timer " + savedId + " &e(" + remaining + "/" + initial + " seconds | Paused: " + paused + ")");
+        } else {
+            msgManager.debug("&4There is a timer state, but it does not have the COUNTDOWN format, skipping...");
+        }
 
-        if (!paused) {
+        if (!paused && "COUNTDOWN".equals(settings.format)) {
             timer.start();
         }
     }

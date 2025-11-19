@@ -8,6 +8,9 @@ import java.net.URL;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import voiidstudios.vct.VoiidCountdownTimer;
+import voiidstudios.vct.managers.MessagesManager;
+
 public class UpdateChecker implements Listener {
     private static final String API_URL = "https://api.github.com/repos/Voiid-Studios/voiidcountdown/releases/latest";
     private String currentVersion;
@@ -18,6 +21,8 @@ public class UpdateChecker implements Listener {
     }
 
     public UpdateCheckerResult check(){
+        MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
+
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(API_URL).openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
@@ -35,6 +40,7 @@ public class UpdateChecker implements Listener {
 
             if (!latestVersion.equalsIgnoreCase(currentVersion)) return UpdateCheckerResult.noErrors(latestVersion);
 
+            msgManager.debug("&aYou are using the latest version! :D");
             return UpdateCheckerResult.noErrors(null);
         } catch (Exception ex) {
             return UpdateCheckerResult.error();

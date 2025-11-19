@@ -110,7 +110,7 @@ public class MessagesManager {
 
         MainConfigManager main = configsManager.getMainConfigManager();
         if (main != null && main.isDebug_mode()) {
-            console(prefix + "&7[DEBUG] &r" + message);
+            console(prefix + "&8[DEBUG] &r" + message);
         }
     }
 }

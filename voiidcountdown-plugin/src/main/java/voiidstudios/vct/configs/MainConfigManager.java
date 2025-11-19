@@ -63,6 +63,10 @@ public class MainConfigManager {
         try {
             String text = new String(Files.readAllBytes(pathConfig));
             
+            if(!text.contains("language:")){
+                getConfig().set("Config.language", "en_US");
+                saveConfig();
+            }
             if(!text.contains("auto_update:")){
                 getConfig().set("Config.auto_update", false);
                 saveConfig();
