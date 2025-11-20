@@ -61,10 +61,16 @@ public final class VoiidCountdownTimer extends JavaPlugin {
         messagesManager.loadLanguage(
                 configsManager.getMainConfigManager().getLanguage()
         );
+
+        messagesManager.debug("&bDebug mode enabled, you will see many debug messages only on your server console! ;)");
         
+        messagesManager.debug("&6Initializing commands and events");
+
         setVersion();
         registerCommands();
         registerEvents();
+
+        messagesManager.debug("&6Setting up placeholders on PlaceholderAPI");
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIExpansion(this).register();
@@ -75,24 +81,37 @@ public final class VoiidCountdownTimer extends JavaPlugin {
         messagesManager.console("&5   \\/  &6|__  |    &8Running v" + version + " on " + serverName + " (" + cleanVersion + ")");
         messagesManager.console("");
 
+        messagesManager.debug("&6Setting up bStats metrics");
+
         new Metrics(this, 26790);
+
         dependencyManager = new DependencyManager(this);
         dynamicsManager = new DynamicsManager(this);
         updateChecker = new UpdateChecker(version);
 
+        messagesManager.debug("&6Checking for updates");
+
         checkUpdates(updateChecker.check());
+
+        messagesManager.debug("&6Checking if there is a timer state");
 
         timerStateManager = new TimerStateManager(this);
         timerStateManager.loadState();
+
+        messagesManager.debug("&6Loading expansions");
 
         expansionManager = new ExpansionManager(this);
         expansionManager.loadExpansions();
     }
 
     public void onDisable() {
+        messagesManager.debug("&6Checking for an active timer");
+        
         if (timerStateManager != null && configsManager.getMainConfigManager().isSave_state_timers()) {
             timerStateManager.saveState();
         }
+
+        messagesManager.debug("&6Disabling expansions");
 
         if (expansionManager != null) {
             expansionManager.shutdown();

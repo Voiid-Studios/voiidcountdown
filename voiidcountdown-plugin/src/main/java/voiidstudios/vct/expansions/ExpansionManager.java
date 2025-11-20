@@ -10,9 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,7 +28,6 @@ public class ExpansionManager {
     private final File expansionsDirectory;
 
     private static final String METADATA_FILE = "expansion.yml";
-    private static final String[] BUNDLED_EXPANSIONS = new String[] {"stopwatch"};
 
     public ExpansionManager(VoiidCountdownTimer plugin) {
         this.plugin = plugin;
@@ -48,12 +45,10 @@ public class ExpansionManager {
             return;
         }
 
-        exportBundledExamples();
-
         refreshDiscoveredExpansions();
 
         if (discoveredExpansions.isEmpty()) {
-            plugin.getLogger().info("No expansions were found to load.");
+            msgManager.debug("No expansions were found to load.");
             return;
         }
 
@@ -108,41 +103,6 @@ public class ExpansionManager {
         }
 
         return false;
-    }
-
-    private void exportBundledExamples() {
-        for (String expansionId : BUNDLED_EXPANSIONS) {
-            File targetDirectory = new File(expansionsDirectory, expansionId);
-            if (!targetDirectory.exists() && !targetDirectory.mkdirs()) {
-                plugin.getLogger().warning(String.format(Locale.ROOT, "Unable to create folder for example expansion %s", expansionId));
-                continue;
-            }
-
-            copyResourceIfAbsent("expansions/" + expansionId + "/" + METADATA_FILE, new File(targetDirectory, METADATA_FILE));
-            copyResourceIfAbsent("expansions/" + expansionId + "/main.js", new File(targetDirectory, "main.js"));
-        }
-    }
-
-    private void copyResourceIfAbsent(String resourcePath, File destination) {
-        if (destination.exists()) {
-            return;
-        }
-
-        try (InputStream inputStream = plugin.getResource(resourcePath)) {
-            if (inputStream == null) {
-                return;
-            }
-
-            try (FileOutputStream outputStream = new FileOutputStream(destination)) {
-                byte[] buffer = new byte[4096];
-                int len;
-                while ((len = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, len);
-                }
-            }
-        } catch (IOException exception) {
-            plugin.getLogger().log(Level.WARNING, String.format(Locale.ROOT, "Unable to export resource %s", resourcePath), exception);
-        }
     }
 
     public void shutdown() {

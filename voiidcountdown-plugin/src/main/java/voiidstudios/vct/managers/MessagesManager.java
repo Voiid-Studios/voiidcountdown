@@ -101,6 +101,10 @@ public class MessagesManager {
         return translations.getStringList(key);
     }
 
+    public TranslationManager.TranslationBundle getCustomTranslations(String namespace) {
+        return translations.forCustomNamespace(namespace);
+    }
+
     public void console(String msg) {
         Bukkit.getConsoleSender().sendMessage(color(msg));
     }
@@ -110,7 +114,7 @@ public class MessagesManager {
 
         MainConfigManager main = configsManager.getMainConfigManager();
         if (main != null && main.isDebug_mode()) {
-            console(prefix + "&7[DEBUG] &r" + message);
+            console(prefix + "&8[DEBUG] &r" + message);
         }
     }
 }

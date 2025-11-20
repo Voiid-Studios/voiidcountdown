@@ -76,8 +76,6 @@ public class UpdateDownloaderGithub {
 
             msgManager.console(VoiidCountdownTimer.prefix + "&bDownloading latest stable update...");
 
-            msgManager.console(VoiidCountdownTimer.prefix + "&bDownloading latest stable update...");
-
             long start = System.currentTimeMillis();
             download(downloadUrl);
 

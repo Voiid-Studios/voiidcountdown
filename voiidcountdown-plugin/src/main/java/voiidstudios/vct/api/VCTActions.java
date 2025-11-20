@@ -27,13 +27,16 @@ public class VCTActions {
                 settings.sound,
                 settings.color,
                 settings.style,
+                settings.format,
                 usedTimerId,
                 settings.hasSound,
                 settings.volume,
                 settings.pitch
         );
 
-        timer.start();
+        if ("COUNTDOWN".equals(settings.format)) {
+            timer.start();
+        }
         TimerManager.getInstance().setTimer(timer);
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.CREATE, sender));
