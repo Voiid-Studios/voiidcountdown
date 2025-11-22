@@ -9,6 +9,8 @@ import voiidstudios.vct.configs.MainConfigManager;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 public class MessagesManager {
     private static String prefix;
     private final TranslationManager translations;
@@ -38,6 +40,35 @@ public class MessagesManager {
     public String color(String msg) {
         if (msg == null) return "§cMissing message";
         return msg.replace("&", "§");
+    }
+
+    public String getTranslated(String key) {
+        return getTranslated(key, null, true);
+    }
+
+    public String getTranslated(String key, Map<String, String> replacements) {
+        return getTranslated(key, replacements, true);
+    }
+
+    public String getTranslated(String key, Map<String, String> replacements, boolean usePrefix) {
+        String msg = translations.formatKey(key, replacements);
+        if (msg == null) msg = "§cMissing message: " + key;
+        return color(applyPrefix(usePrefix, msg));
+    }
+
+    public String getListAsSingleString(String key, @Nullable Map<String, String> repl) {
+        List<String> lines = translations.getStringList(key);
+        if (lines.isEmpty()) return "";
+
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String lineRaw : lines) {
+            String line = translations.formatRaw(lineRaw, repl);
+            if (!first) sb.append("\n");
+            sb.append(line);
+            first = false;
+        }
+        return color(sb.toString());
     }
 
     public void send(CommandSender sender, String key) {
