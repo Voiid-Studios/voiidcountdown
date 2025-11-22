@@ -132,6 +132,17 @@ expansion:
     error: "&cNo expansion was reloaded. Verify that valid expansions exist."
     success: "&a%EXPANSIONS% expansions were reloaded."
 
+  list:
+    title: "&eRegistered expansions (%EXPANSIONS%):"
+    no_extensions: "&cYou don't have any extensions, get them by clicking on the info symbol!"
+    enabled: "Enabled"
+    disabled: "Disabled"
+    hint:
+      - "Extensions allow you to add additional"
+      - "functionality to the VCT plugin."
+      - ""
+      - "Click to learn more and view verified extensions."
+
   expansion_command:
     error: "&cAn error occurred while executing the expansion command. Check the console for more details."
 

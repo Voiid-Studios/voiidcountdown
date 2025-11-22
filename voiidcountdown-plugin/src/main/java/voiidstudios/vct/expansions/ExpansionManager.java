@@ -216,35 +216,52 @@ public class ExpansionManager {
 
     public boolean reloadExpansion(String name) {
         String key = normalizeName(name);
-        boolean wasLoaded = loadedExpansions.containsKey(key);
-        if (wasLoaded && !disableExpansion(name)) {
-            return false;
+        ScriptExpansion previous = loadedExpansions.get(key);
+
+        if (previous != null) {
+            try {
+                previous.disable();
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to disable expansion " + key + " during reload.");
+                return false;
+            }
         }
 
         refreshDiscoveredExpansions();
         ExpansionHandle handle = discoveredExpansions.get(key);
+
         if (handle == null) {
             return false;
         }
 
-        if (!loadExpansion(handle)) {
+        if (loadExpansion(handle)) {
+            return true;
+        } else {
+            if (previous != null) {
+                try {
+                    previous.load();
+                    loadedExpansions.put(key, previous);
+                    plugin.getLogger().warning("Reload of expansion " + key + " failed. Restored previous version.");
+                } catch (Exception ex) {
+                    plugin.getLogger().warning("Failed to restore previous version of expansion " + key);
+                }
+            }
             return false;
         }
-
-        return loadedExpansions.containsKey(key);
     }
 
     public int reloadAllExpansions() {
-        List<String> toDisable = new ArrayList<>(loadedExpansions.keySet());
-        for (String key : toDisable) {
-            disableExpansion(key);
+        List<ScriptExpansion> previous = new ArrayList<>(loadedExpansions.values());
+        for (ScriptExpansion exp : previous) {
+            try { exp.disable(); } catch (Exception ignored) {}
         }
+        loadedExpansions.clear();
 
         refreshDiscoveredExpansions();
 
         int loadedCount = 0;
         for (ExpansionHandle handle : discoveredExpansions.values()) {
-            if (loadExpansion(handle)) {
+            if (handle.metadata.isEnabled() && loadExpansion(handle)) {
                 loadedCount++;
             }
         }

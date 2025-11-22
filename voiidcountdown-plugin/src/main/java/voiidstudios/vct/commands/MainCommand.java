@@ -13,8 +13,14 @@ import voiidstudios.vct.api.VCTEvent;
 import voiidstudios.vct.configs.model.TimerConfig;
 import voiidstudios.vct.expansions.ExpansionManager;
 import voiidstudios.vct.expansions.ExpansionMetadata;
+import voiidstudios.vct.expansions.ScriptExpansion;
 import voiidstudios.vct.managers.MessagesManager;
 import voiidstudios.vct.managers.TimerManager;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -636,9 +642,66 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     msgManager.send(sender, "expansion.reloadall.error");
                 } else {
                     Map<String, String> expansionReloadallRepl = new HashMap<>();
-                    expansionReloadallRepl.put("%EXPANSIONS%", targetName);
+                    expansionReloadallRepl.put("%EXPANSIONS%", String.valueOf(reloaded));
 
                     msgManager.send(sender, "expansion.reloadall.success", expansionReloadallRepl);
+                }
+                return;
+            case "list":
+                List<String> known = expansionManager.getKnownExpansionNames();
+
+                Map<String, String> expansionListTitleRepl = new HashMap<>();
+                expansionListTitleRepl.put("%EXPANSIONS%", String.valueOf(known.size()));
+
+                String hoverText = msgManager.getListAsSingleString("expansion.list.hint", null);
+
+                TextComponent infoIcon = new TextComponent("ℹ ");
+                infoIcon.setColor(ChatColor.AQUA);
+                infoIcon.setHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(hoverText).create()
+                ));
+                infoIcon.setClickEvent(new ClickEvent(
+                    ClickEvent.Action.OPEN_URL,
+                    "https://vctdocs.mintlify.app/usage-guide/expansions"
+                ));
+
+                String prefixColored = ChatColor.translateAlternateColorCodes('&', VoiidCountdownTimer.prefix);
+                TextComponent message = new TextComponent(prefixColored);
+                message.addExtra(infoIcon);
+                String titleColored = ChatColor.translateAlternateColorCodes('&', 
+                    msgManager.getTranslated("expansion.list.title", expansionListTitleRepl, false)
+                );
+                message.addExtra(new TextComponent(titleColored));
+
+                sender.spigot().sendMessage(message);
+
+                if (known.isEmpty()) {
+                    msgManager.send(sender, "expansion.list.no_extensions");
+                } else {
+                    TextComponent listComponent = new TextComponent("");
+                    boolean first = true;
+
+                    for (String name : known) {
+                        boolean active = expansionManager.isExpansionLoaded(name);
+                        ChatColor color = active ? ChatColor.GREEN : ChatColor.RED;
+                        String status = active ? msgManager.getTranslated("expansion.list.enabled", null, false) : msgManager.getTranslated("expansion.list.disabled", null, false);
+
+                        TextComponent expansionComponent = new TextComponent((first ? "" : ChatColor.GRAY + ", ") + color + name);
+                        expansionComponent.setClickEvent(new ClickEvent(
+                            ClickEvent.Action.RUN_COMMAND,
+                            "/vct expansion info " + name
+                        ));
+                        expansionComponent.setHoverEvent(new HoverEvent(
+                            HoverEvent.Action.SHOW_TEXT,
+                            new ComponentBuilder(status).create()
+                        ));
+
+                        listComponent.addExtra(expansionComponent);
+                        first = false;
+                    }
+
+                    sender.spigot().sendMessage(listComponent);
                 }
                 return;
             default:
@@ -705,7 +768,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 }else if(args[0].equalsIgnoreCase("expansion")){
                     subcommands.add("info");subcommands.add("enable");
                     subcommands.add("disable");subcommands.add("reload");
-                    subcommands.add("reloadall");
+                    subcommands.add("reloadall");subcommands.add("list");
                 }
 
                 for(String c : subcommands) {
