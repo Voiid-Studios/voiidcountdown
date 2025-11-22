@@ -2,7 +2,7 @@ Config:
   # Change the language of VCT within the game. The list of available languages is located at: core/messages
   language: en_US
   # The plugin will attempt to auto-update when it finds a new version.
-  auto_update: false
+  auto_update: true
   # The plugin will send an update notification when it finds a new version if auto-update is disabled.
   update_notification: true
   # When the timer ends, how many ticks should wait to hide the boss bar (1 second = 20 ticks)

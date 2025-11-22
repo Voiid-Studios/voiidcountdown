@@ -68,7 +68,7 @@ public class MainConfigManager {
                 saveConfig();
             }
             if(!text.contains("auto_update:")){
-                getConfig().set("Config.auto_update", false);
+                getConfig().set("Config.auto_update", true);
                 saveConfig();
             }
             if(!text.contains("update_notification:")){
