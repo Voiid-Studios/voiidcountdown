@@ -9,6 +9,77 @@ As always, if any bugs come up, [open an issue](https://github.com/Voiid-Studios
 
 ❤️ Support the project on [Ko-fi](https://ko-fi.com/maxxvoiid) :)
 
+<Update label="November 21" tags={["Features", "Improvements", "Bug fixes", "Compatibility"]}>
+
+## Plugin v2.1.0 (Nobelium)
+
+**_It's our anniversary! VCT is celebrating its first year with us ;)_**
+
+Compatible with Bukkit, Spigot, Paper, Purpur & Folia. For Minecraft Java 1.13 - 1.21.10.
+
+## Compatibility
+
+- Official compatibility of the plugin with the Paper fork for performance, Folia, has been added! We hope this will be very useful for those looking for excellent performance and that VCT is now available.
+
+## New Features
+
+### **Auto-updating plugin**
+Are you tired of having to manually delete the VCT .jar file and then manually download it again?
+
+Well, that won't happen anymore with the auto-update option! With this option, every time VCT is updated, the plugin will update itself automatically and the new version will be available the next time the server is started.
+
+### **Modular Translation System**
+A complete replacement of the old `Messages:` block in `config.yml`.
+
+- New folders:
+  - `/core/messages/origins/` -> default language files  
+  - `/core/messages/custom/` -> user overrides  
+- Automatic synchronization of missing keys.  
+- Supports:
+  - single messages  
+  - lists (`lines:`)  
+  - sections (`header:` + `lines:`)  
+- Everything visible **inside Minecraft** is now translatable.
+
+A legacy config warning will appear if the old `Messages:` section is still present.
+
+### **Expansion System**
+VCT now supports first-party and custom expansions using a clean API.
+
+- New commands:
+  - `/vct expansion info <id>`
+  - `/vct expansion enable <id>`
+  - `/vct expansion disable <id>`
+  - `/vct expansion reload <id>`
+  - `/vct expansion list`
+  - `/vct expansion reloadall`
+- Expansions include metadata, help sections, and isolated configuration.
+
+## Improvements
+
+- Major internal cleanup & refactor of the command system.  
+- Rewrote help menus to use the new translation structure.  
+- Unified message formatting across commands & expansions.  
+- Improved auto-updater messages and reduced duplicated logs.  
+- Improved structure of config loading for timers & core folders.
+
+- Improved the documentation with more accurate and up-to-date information.  
+- Enhanced internal consistency across pages for easier navigation.
+
+## Bug fixes
+- Fixed a bug where when you used VCT in Paper, it showed that you were using Folia compatibility when it shouldn't have happened.
+- Fixed messages when using /vct set, pause, or resume, which were displaying “Missing.”
+- Fixed a bug where the “stopwatch” extension was created in the extensions folder when it shouldn’t have been.
+- Fixed the language setting in config.yml, it should now appear if you didn’t have it previously.
+- Fixed missing translation keys not being created on first load.
+- Fixed issues with list-based translations showing incorrectly.
+- Fixed rare startup errors caused by load order.
+- Fixed multiple formatting inconsistencies across commands.
+
+### [Modrinth Release: v2.1.0](https://modrinth.com/datapack/voiid-countdown-timer/version/2.1.0)
+
+</Update>
+
 <Update label="October 10" tags={["Features", "Improvements", "Bug fixes", "Documentation", "Compatibility"]}>
 
 ## Plugin v2.0.2 (Astro)
@@ -37,7 +108,7 @@ Compatible with Bukkit, Spigot, Paper & Purpur. For Minecraft Java 1.13 - 1.21.1
 - Corrected changelog entries for version 2.0.1 across all platforms, as they listed an incorrect Minecraft version.  
   _(We still don’t know how that happened, but it’s fixed now.)_
 
-### [Modrinth Release: v2.0.0](https://modrinth.com/datapack/voiid-countdown-timer/version/2.0.2)
+### [Modrinth Release: v2.0.2](https://modrinth.com/datapack/voiid-countdown-timer/version/2.0.2)
 
 </Update>
 
@@ -70,7 +141,7 @@ Compatible with Bukkit, Spigot, Paper & Purpur. For Minecraft Java 1.13 - 1.21.9
 - Fixed the help message to correctly include `/vct modify` and all relevant modifiers.
 - Fixed the wiki by removing unnecessary pages and cleaning up outdated content.
 
-### [Modrinth Release: v2.0.0](https://modrinth.com/datapack/voiid-countdown-timer/version/2.0.1)
+### [Modrinth Release: v2.0.1](https://modrinth.com/datapack/voiid-countdown-timer/version/2.0.1)
 
 </Update>
 
