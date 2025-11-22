@@ -1,10 +1,8 @@
 package voiidstudios.vct.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import voiidstudios.vct.VoiidCountdownTimer;
-import voiidstudios.vct.managers.MessagesManager;
 
 public enum Formatter {
     MINIMESSAGE(
@@ -29,9 +27,7 @@ public enum Formatter {
                                     .invoke(miniMessage, text, emptyResolvers);
                         } catch (NoSuchMethodException | ClassNotFoundException ignored) {}
                     } catch (Exception e) {
-                        Bukkit.getConsoleSender().sendMessage(
-                                MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&cMiniMessage unavailable: " + e.getClass().getName() + ": " + e.getMessage())
-                        );
+                        plugin.getLogger().warning("MiniMessage unavailable: " + e.getClass().getName() + ": " + e.getMessage());
                     }
                 }
                 return text.replace("&", "§"); // fallback
@@ -59,9 +55,8 @@ public enum Formatter {
 
                     return legacyCls.getMethod("deserialize", String.class).invoke(serializer, text);
                 } catch (Exception e) {
-                    Bukkit.getConsoleSender().sendMessage(
-                            MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&cLegacy unavailable: " + e.getClass().getName() + ": " + e.getMessage())
-                    );
+                    plugin.getLogger().warning("Legacy unavailable: " + e.getClass().getName() + ": " + e.getMessage());
+
                     return text.replace("&", "§");
                 }
             },
@@ -134,9 +129,7 @@ public enum Formatter {
                     } catch (NoSuchMethodException | ClassNotFoundException ignored) {}
 
                 } catch (Exception e) {
-                    Bukkit.getConsoleSender().sendMessage(
-                            MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&cUniversal unavailable: " + e.getClass().getName() + ": " + e.getMessage())
-                    );
+                    plugin.getLogger().warning("Universal unavailable: " + e.getClass().getName() + ": " + e.getMessage());
                 }
 
                 // fallback

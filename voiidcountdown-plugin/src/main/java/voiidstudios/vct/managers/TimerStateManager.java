@@ -10,9 +10,10 @@ import voiidstudios.vct.utils.TimerDefaults;
 
 public class TimerStateManager {
     private final CustomConfig stateConfig;
+    private final MessagesManager msgManager = VoiidCountdownTimer.getMessagesManager();
 
     public TimerStateManager(VoiidCountdownTimer plugin) {
-        this.stateConfig = new CustomConfig("timer_state.yml", plugin, null, true);
+        this.stateConfig = new CustomConfig("timer_state.yml", plugin, "core", true);
         this.stateConfig.registerConfig();
     }
 
@@ -31,7 +32,7 @@ public class TimerStateManager {
             return;
         }
 
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&rSaving the state of timer " + timer.getTimerId()));
+        msgManager.console(VoiidCountdownTimer.prefix+"&rSaving the state of timer " + timer.getTimerId());
 
         cfg.set("active", true);
         cfg.set("timer_id", timer.getTimerId());
@@ -53,7 +54,7 @@ public class TimerStateManager {
 
         if (initial <= 0 || remaining <= 0) return;
 
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&rLoading the state of timer " + savedId));
+        msgManager.console(VoiidCountdownTimer.prefix+"&rLoading the state of timer " + savedId);
         TimerDefaults.TimerSettings settings = TimerDefaults.getSettings(savedId);
         String usedId = savedId;
 
@@ -63,6 +64,7 @@ public class TimerStateManager {
                 settings.sound,
                 settings.color,
                 settings.style,
+                settings.format,
                 usedId,
                 settings.hasSound,
                 settings.volume,
@@ -73,9 +75,13 @@ public class TimerStateManager {
         timer.setSeconds(remaining);
         TimerManager.getInstance().setTimer(timer);
 
-        Bukkit.getConsoleSender().sendMessage(MessagesManager.getColoredMessage(VoiidCountdownTimer.prefix+"&aLoaded the state of timer " + savedId + " &e(" + remaining + "/" + initial + " seconds | Paused: " + paused + ")"));
+        if ("COUNTDOWN".equals(settings.format)) {
+            msgManager.console(VoiidCountdownTimer.prefix+"&aLoaded the state of timer " + savedId + " &e(" + remaining + "/" + initial + " seconds | Paused: " + paused + ")");
+        } else {
+            msgManager.debug("&4There is a timer state, but it does not have the COUNTDOWN format, skipping...");
+        }
 
-        if (!paused) {
+        if (!paused && "COUNTDOWN".equals(settings.format)) {
             timer.start();
         }
     }

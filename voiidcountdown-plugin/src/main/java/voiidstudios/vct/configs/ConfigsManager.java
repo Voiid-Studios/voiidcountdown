@@ -14,14 +14,17 @@ import java.util.Map;
 public class ConfigsManager {
     private final MainConfigManager mainConfigManager;
     private final TimersFolderConfigManager timerFolderConfigManager;
+    private final CoreFolderConfigManager coreFolderConfigManager;
     private final Map<String, TimerConfig> timersConfigs = new LinkedHashMap<>();
 
     public ConfigsManager(VoiidCountdownTimer plugin){
         this.mainConfigManager = new MainConfigManager(plugin);
         this.timerFolderConfigManager = new TimersFolderConfigManager(plugin, "timers");
+        this.coreFolderConfigManager = new CoreFolderConfigManager(plugin, "core");
     }
 
     public void configure(){
+        coreFolderConfigManager.configure();
         mainConfigManager.configure();
         timerFolderConfigManager.configure();
         configureTimers();
@@ -67,6 +70,9 @@ public class ConfigsManager {
                     if (!config.contains(base + "bossbar_style")) {
                         config.set(base + "bossbar_style", "SOLID");
                     }
+                    if (!config.contains(base + "format")) {
+                        config.set(base + "format", "COUNTDOWN");
+                    }
                     if (!config.contains(base + "enabled")) {
                         config.set(base + "enabled", true);
                     }
@@ -84,6 +90,7 @@ public class ConfigsManager {
                     float soundPitch = (float) config.getDouble(base + "sound_pitch", 1.0);
                     String colorStr = config.getString(base + "bossbar_color", "WHITE");
                     String styleStr = config.getString(base + "bossbar_style", "SOLID");
+                    String formatStr = config.getString(base + "format", "COUNTDOWN");
 
                     BarColor color;
                     try {
@@ -99,7 +106,9 @@ public class ConfigsManager {
                         style = BarStyle.SOLID;
                     }
 
-                    TimerConfig tc = new TimerConfig(key, text, sound, color, style, enabled, soundEnabled, soundVolume, soundPitch);
+                    String format = TimerConfig.normalizeFormat(formatStr);
+
+                    TimerConfig tc = new TimerConfig(key, text, sound, color, style, format, enabled, soundEnabled, soundVolume, soundPitch);
 
                     timersConfigs.put(key, tc);
                 }
@@ -121,6 +130,7 @@ public class ConfigsManager {
                 config.set(base + "sound_pitch", tc.getSoundPitch());
                 config.set(base + "bossbar_color", tc.getColor().toString());
                 config.set(base + "bossbar_style", tc.getStyle().toString());
+                config.set(base + "format", TimerConfig.normalizeFormat(tc.getFormat()));
 
                 configFile.saveConfig();
                 break;

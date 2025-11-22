@@ -1,13 +1,52 @@
 main: voiidstudios.vct.VoiidCountdownTimer
 name: VoiidCountdownTimer
-version: 2.0.2
-codename: astro
-authors: [Voiid Studios]
+version: 2.1.0
+codename: nobelium
+authors: ["Voiid Studios"]
 api-version: 1.13
-softdepend: [PlaceholderAPI]
+softdepend: ["PlaceholderAPI"]
+folia-supported: true
 
 commands:
   voiidcountdowntimer:
     description: Main command of Voiid Countdown Timer
     aliases:
       - vct
+
+permissions:
+  voiidcountdowntimer.admin:
+    description: Allows complete control over all VCT commands
+    default: op
+    children:
+      voiidcountdowntimer.command.help: true
+      voiidcountdowntimer.command.reload: true
+      voiidcountdowntimer.command.set: true
+      voiidcountdowntimer.command.pause: true
+      voiidcountdowntimer.command.resume: true
+      voiidcountdowntimer.command.stop: true
+      voiidcountdowntimer.command.modify: true
+      voiidcountdowntimer.command.expansion: true
+  voiidcountdowntimer.command.help:
+    description: Allows use /vct help
+    default: true
+  voiidcountdowntimer.command.reload:
+    description: Allows use /vct reload
+    default: op
+  voiidcountdowntimer.command.set:
+    description: Allows use /vct set
+    default: op
+  voiidcountdowntimer.command.pause:
+    description: Allows use /vct pause
+    default: op
+  voiidcountdowntimer.command.resume:
+    description: Allows use /vct resume
+    default: op
+  voiidcountdowntimer.command.stop:
+    description: Allows use /vct stop
+    default: op
+  voiidcountdowntimer.command.modify:
+    description: Allows use /vct modify
+    default: op
+  voiidcountdowntimer.command.expansion:
+    description: Allows use /vct expansion
+    default: op

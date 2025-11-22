@@ -27,13 +27,16 @@ public class VCTActions {
                 settings.sound,
                 settings.color,
                 settings.style,
+                settings.format,
                 usedTimerId,
                 settings.hasSound,
                 settings.volume,
                 settings.pitch
         );
 
-        timer.start();
+        if ("COUNTDOWN".equals(settings.format)) {
+            timer.start();
+        }
         TimerManager.getInstance().setTimer(timer);
 
         Bukkit.getPluginManager().callEvent(new VCTEvent(timer, VCTEvent.VCTEventType.CREATE, sender));
@@ -72,7 +75,7 @@ public class VCTActions {
         TimerConfig timerCfg = VoiidCountdownTimer.getConfigsManager().getTimerConfig(timer.getTimerId());
         if (timerCfg == null) {
             if(sender != null) {
-                msgManager.sendConfigMessage(sender, "Messages.timerConfigNotFound", true, null);
+                msgManager.send(sender, "timer_status.config_not_found");
             }
             return false;
         }
