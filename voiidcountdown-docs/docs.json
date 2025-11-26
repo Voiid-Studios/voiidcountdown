@@ -30,6 +30,7 @@
             "pages": [
               "usage-guide/commands-permissions",
               "usage-guide/configuration",
+              "usage-guide/expansions",
               "usage-guide/animations",
               "usage-guide/integrations"
             ]
