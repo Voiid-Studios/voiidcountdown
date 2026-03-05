@@ -1,25 +1,29 @@
-<div align="center">
+>[!IMPORTANT]
+><b>Development is currently slower than usual.</b>
+>
+>VCT is maintained by a single developer, and due to personal time constraints, updates may take longer to arrive. The project is still active and will continue to receive improvements in the future.
 
-<img src="https://github.com/user-attachments/assets/31ffc42e-ac93-4b74-8855-ed896ae12e5d" alt="VCTStamp2" height="120"/>
+<img width="200" src="https://github.com/Voiid-Studios/voiidcountdown/raw/main/voiidcountdown-datapack/pack.png" alt="VCT icon" align="right">
 
-### As simple as the name implies.
-Voiid Countdown Timer is a simple customizable countdown timer datapack & plugin.
+<div align="left">
 
-[![Release VCT](https://img.shields.io/github/v/release/Voiid-Studios/voiidcountdown?style=flat&logo=github&label=Release&color=fe50dc "View the latest release")](https://github.com/Voiid-Studios/voiidcountdown/releases)
-[![Modrinth](https://img.shields.io/modrinth/dt/N6N9gUha?style=flat&logo=modrinth&label=Modrinth&color=%2300AF5C "View Modrinth page")](https://modrinth.com/datapack/voiid-countdown-timer)
-[![CurseForge](https://img.shields.io/curseforge/dt/1145327?style=flat&logo=curseforge&label=CurseForge&color=F16436 "View CurseForge page")](https://curseforge.com/minecraft/data-packs/vct-voiid-countdown-timer/)
-[![SpigotMC](https://img.shields.io/spiget/downloads/127616?style=flat&logo=spigotmc&logoColor=ffd000&label=SpigotMC&color=ffd000 "View SpigotMC page")](https://www.spigotmc.org/resources/voiid-countdown-timer.127616/)
-[![Hangar](https://img.shields.io/hangar/dt/Voiid-Countdown-Timer?style=flat&logo=chianetwork&logoColor=60a5fa&label=Hangar&color=60a5fa "View Hangar page")](https://hangar.papermc.io/VoiidStudios/Voiid-Countdown-Timer)
+# Voiid Countdown Timer
+As simple as the name implies. A customizable timer datapack & plugin.
 
-[![GitHub Support](https://img.shields.io/badge/support-github?style=for-the-badge&logo=github&label=GitHub&color=0390fc "Any problems? Create an issue on GitHub")](https://github.com/Voiid-Studios/voiidcountdown/issues)
-[![License](https://img.shields.io/badge/license-example?style=for-the-badge&label=Voiid%20Studios&color=ffffff "View the Voiid Studios public license")](https://github.com/Voiid-Studios/voiidstudios/blob/main/LICENSE.md)
-[![Ko-fi](https://img.shields.io/badge/Kofi-ff6433?logo=kofi&logoColor=fff&style=for-the-badge "Support us on Ko-fi!")](https://api.maxxvoiid.space/kofi)
+[![Kofi](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/kofi-plural_vector.svg "Support us on Ko-fi")](https://ko-fi.com/maxxvoiid/donate)
+[![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg "Download on Modrinth")](https://modrinth.com/datapack/voiid-countdown-timer)
+[![CurseForge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg "Download on CurseForge")](https://curseforge.com/minecraft/bukkit-plugins/voiid-countdown-timer-for-bukkit)
+
+[![VCTDocs](https://i.himag.es/i/3e3z1-zjpcw/1/vct_docs_compact.svg "Read VCT Documentation")](https://vctdocs.mintlify.app/)
+[![VSPL](https://i.himag.es/i/a77c6-slc87/1/vspl_license.svg "View the Voiid Studios Public License")](https://github.com/Voiid-Studios/voiidstudios/blob/main/LICENSE.md)
+[![Crowdin](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact-minimal/translate/crowdin_vector.svg "Translate VCT on Crowdin")](https://crowdin.com/project/voiidcountdowntimer)s
+[![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact-minimal/available/github_vector.svg "View VCT Source Code on GitHub")](https://github.com/Voiid-Studios/voiidcountdown)
+
+</div>
 
 ![timer1](https://github.com/user-attachments/assets/d0181bbf-06ba-4d74-824e-8849eb49701f)
 
 ![timer2](https://github.com/user-attachments/assets/2287f6c8-72bb-48c1-a36f-be2625913a3d)
-
-</div>
 
 ## ❓ What is VCT?
 Voiid Countdown Timer (VCT) is a fully customizable timer for Minecraft.
@@ -40,7 +44,7 @@ Voiid Countdown Timer includes:
 - ⏳ Progressive Time Bar
 - 🎈 Custom Events
 - 👥 SinglePlayer and Multiplayer Compatible
-- 💻 Open Source and constantly updated
+- 💻 Open Source and actively maintained
 
 ## 📋 Requirements
 ### 📦 Datapack
