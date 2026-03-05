@@ -43,13 +43,13 @@ export const HeroCard = ({ filename, title, description, href }) => {
 
     <div className="max-w-xl mx-auto px-2 mt-4 flex justify-center gap-1 flex-wrap">
       <a
-        href="https://github.com/Voiid-Studios/voiidcountdown/releases"
+        href="https://ko-fi.com/maxxvoiid/donate"
         target="_blank"
         rel="noopener noreferrer"
       >
         <img
-          src="https://img.shields.io/github/v/release/Voiid-Studios/voiidcountdown?style=flat&logo=github&label=Release&color=fe50dc"
-          alt="View the latest release"
+          src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/kofi-plural_vector.svg"
+          alt="Support us on Ko-fi!"
         />
       </a>
       <a
@@ -58,76 +58,64 @@ export const HeroCard = ({ filename, title, description, href }) => {
         rel="noopener noreferrer"
       >
         <img
-          src="https://img.shields.io/modrinth/dt/N6N9gUha?style=flat&logo=modrinth&label=Modrinth&color=%2300AF5C"
-          alt="View Modrinth page"
+          src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"
+          alt="Download on Modrinth"
         />
       </a>
       <a
-        href="https://curseforge.com/minecraft/data-packs/vct-voiid-countdown-timer/"
+        href="https://curseforge.com/minecraft/bukkit-plugins/voiid-countdown-timer-for-bukkit"
         target="_blank"
         rel="noopener noreferrer"
       >
         <img
-          src="https://img.shields.io/curseforge/dt/1145327?style=flat&logo=curseforge&label=CurseForge&color=F16436"
-          alt="View CurseForge page"
-        />
-      </a>
-      <a
-        href="https://www.spigotmc.org/resources/voiid-countdown-timer.127616/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src="https://img.shields.io/spiget/downloads/127616?style=flat&logo=spigotmc&logoColor=ffd000&label=SpigotMC&color=ffd000"
-          alt="View SpigotMC page"
-        />
-      </a>
-      <a
-        href="https://hangar.papermc.io/VoiidStudios/Voiid-Countdown-Timer/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src="https://img.shields.io/hangar/dt/Voiid-Countdown-Timer?style=flat&logo=chianetwork&logoColor=60a5fa&label=Hangar&color=60a5fa"
-          alt="View Hangar page"
+          src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg"
+          alt="Download on CurseForge"
         />
       </a>
     </div>
 
     <div className="max-w-xl mx-auto px-4 mt-4 flex justify-center gap-1 flex-wrap">
       <a
-        href="https://github.com/Voiid-Studios/voiidcountdown/issues"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src="https://img.shields.io/badge/support-github?style=for-the-badge&logo=github&label=GitHub&color=0390fc"
-          alt="Any problems? Create an issue on GitHub"
-        />
-      </a>
-      <a
         href="https://github.com/Voiid-Studios/voiidstudios/blob/main/LICENSE.md"
         target="_blank"
         rel="noopener noreferrer"
       >
         <img
-          src="https://img.shields.io/badge/license-example?style=for-the-badge&label=Voiid%20Studios&color=ffffff"
-          alt="View the Voiid Studios public license"
+          src="https://i.himag.es/i/a77c6-slc87/1/vspl_license.svg"
+          alt="View the Voiid Studios Public License"
         />
       </a>
       <a
-        href="https://ko-fi.com/maxxvoiid"
+        href="https://crowdin.com/project/voiidcountdowntimer"
         target="_blank"
         rel="noopener noreferrer"
       >
         <img
-          src="https://img.shields.io/badge/Kofi-ff6433?logo=kofi&logoColor=fff&style=for-the-badge"
-          alt="Support us on Ko-fi!"
+          src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/translate/crowdin_vector.svg"
+          alt="Translate VCT on Crowdin"
+        />
+      </a>
+      <a
+        href="https://github.com/Voiid-Studios/voiidcountdown"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact-minimal/available/github_vector.svg"
+          alt="View VCT Source Code on GitHub"
         />
       </a>
     </div>
 
-    <div className="px-6 lg:px-0 mt-12 lg:mt-24 grid sm:grid-cols-2 gap-x-6 gap-y-4">
+    <div className="max-w-xl mx-auto mt-4 flex justify-center gap-1 flex-wrap">
+      <Info>
+        <b>Development is currently slower than usual.</b>
+
+        VCT is maintained by a single developer, and due to personal time constraints, updates may take longer to arrive. The project is still active and will continue to receive improvements in the future.
+      </Info>
+    </div>
+
+    <div className="px-6 lg:px-0 mt-12 lg:mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-4">
       <HeroCard
         filename="bolt"
         title="Quick Overview"
