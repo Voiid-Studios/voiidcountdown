@@ -27,5 +27,7 @@ bossbar add voiidtimer:bar {"color": "white", "text": "VOIID TIMER"}
 bossbar set voiidtimer:bar visible false
 
 ## Initializes the installation process
+execute if score InstalledOneTime Timer matches 0 run tellraw @a [{"text":"■","bold":false,"color":"light_purple"},{"text":" VCT: ","bold":true,"color":"light_purple"},{"text":"Initializing core","bold":false,"color":"light_purple"}]
+
 schedule function vct:internal/api/reset 1s
 schedule function vct:internal/init/installer 3s
