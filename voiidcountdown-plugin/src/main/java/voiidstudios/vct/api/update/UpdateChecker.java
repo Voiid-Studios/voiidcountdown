@@ -1,15 +1,19 @@
 package voiidstudios.vct.api.update;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import voiidstudios.vct.VoiidCountdownTimer;
 import voiidstudios.vct.managers.MessagesManager;
+import voiidstudios.vct.utils.ServerCompatibility;
 
 public class UpdateChecker implements Listener {
     private static final String API_URL = "https://api.github.com/repos/Voiid-Studios/voiidcountdown/releases/latest";
@@ -53,5 +57,43 @@ public class UpdateChecker implements Listener {
 
     public String getCurrentVersion() {
         return currentVersion;
+    }
+
+    private void checkAndCallback(VoiidCountdownTimer plugin, Consumer<UpdateCheckerResult> callback) {
+        UpdateCheckerResult result = check();
+
+        if (ServerCompatibility.isFolia()) {
+            Bukkit.getGlobalRegionScheduler().run(plugin, scheduledTask -> callback.accept(result));
+        } else {
+            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(result));
+        }
+    }
+
+    public void checkAsync(VoiidCountdownTimer plugin, Consumer<UpdateCheckerResult> callback) {
+        if (ServerCompatibility.isFolia()) {
+            Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> checkAndCallback(plugin, callback));
+        } else {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkAndCallback(plugin, callback));
+        }
+    }
+
+    public void scheduleRepeatingCheck(VoiidCountdownTimer plugin, Consumer<UpdateCheckerResult> callback, long periodHours) {
+        if (ServerCompatibility.isFolia()) {
+            Bukkit.getAsyncScheduler().runAtFixedRate(
+                    plugin,
+                    scheduledTask -> checkAndCallback(plugin, callback),
+                    periodHours,
+                    periodHours,
+                    TimeUnit.HOURS
+            );
+        } else {
+            long periodTicks = periodHours * 60 * 60 * 20L; // 20 ticks per second
+            Bukkit.getScheduler().runTaskTimerAsynchronously(
+                    plugin,
+                    () -> checkAndCallback(plugin, callback),
+                    periodTicks,
+                    periodTicks
+            );
+        }
     }
 }

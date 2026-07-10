@@ -1,8 +1,11 @@
 package voiidstudios.vct;
 
+import dev.faststats.bukkit.BukkitContext;
+import dev.faststats.data.Metric;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import voiidstudios.vct.api.Metrics;
+import voiidstudios.vct.api.DownloadSource;
 import voiidstudios.vct.api.PAPIExpansion;
 import voiidstudios.vct.api.update.UpdateChecker;
 import voiidstudios.vct.api.update.UpdateCheckerResult;
@@ -18,6 +21,9 @@ import voiidstudios.vct.managers.MessagesManager;
 import voiidstudios.vct.managers.TimerStateManager;
 import voiidstudios.vct.utils.ServerCompatibility;
 import voiidstudios.vct.utils.ServerVersion;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public final class VoiidCountdownTimer extends JavaPlugin {
     public static String prefix = "&5[&dVCT&5] ";
@@ -39,9 +45,13 @@ public final class VoiidCountdownTimer extends JavaPlugin {
     private static TimerStateManager timerStateManager;
     private static DependencyManager dependencyManager;
     private static ExpansionManager expansionManager;
+    private BukkitContext metricsContext;
+    private String downloadSource;
+    private long startTime;
 
     public void onEnable() {
         instance = this;
+        startTime = System.currentTimeMillis();
 
         if (Boolean.getBoolean(VCT_LOADED_PROPERTY)) {
             sendConsoleUnstableReloadMessage();
@@ -81,9 +91,17 @@ public final class VoiidCountdownTimer extends JavaPlugin {
         messagesManager.console("&5   \\/  &6|__  |    &8Running v" + version + " on " + serverName + " (" + cleanVersion + ")");
         messagesManager.console("");
 
-        messagesManager.debug("&6Setting up bStats metrics");
+        messagesManager.debug("&6Setting up fastStats metrics");
 
-        new Metrics(this, 26790);
+        downloadSource = DownloadSource.detect(this);
+
+        metricsContext = new BukkitContext.Factory(this, "27dcb7f8a6c16aa5763c89561ef81ffe")
+                .metrics(factory -> factory
+                        .addMetric(Metric.string("download_source", () -> downloadSource))
+                        .addMetric(Metric.number("uptime_days", () -> (System.currentTimeMillis() - startTime) / (1000L * 60 * 60 * 24)))
+                        .create())
+                .create();
+        metricsContext.ready();
 
         dependencyManager = new DependencyManager(this);
         dynamicsManager = new DynamicsManager(this);
@@ -91,7 +109,8 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
         messagesManager.debug("&6Checking for updates");
 
-        checkUpdates(updateChecker.check());
+        updateChecker.checkAsync(this, this::checkUpdates);
+        updateChecker.scheduleRepeatingCheck(this, this::checkUpdates, 6L);
 
         messagesManager.debug("&6Checking if there is a timer state");
 
@@ -115,6 +134,12 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 
         if (expansionManager != null) {
             expansionManager.shutdown();
+        }
+
+        messagesManager.debug("&6Shutting down fastStats metrics");
+
+        if (metricsContext != null) {
+            metricsContext.shutdown();
         }
 
         messagesManager.console(prefix+"&aHas been disabled! Goodbye ;)");
@@ -150,7 +175,18 @@ public final class VoiidCountdownTimer extends JavaPlugin {
 			case "1.21.10":
 				serverVersion = ServerVersion.v1_21_R6;
 				break;
-            default:
+			case "1.21.11":
+				serverVersion = ServerVersion.v1_21_R7;
+				break;
+			case "26.1":
+			case "26.1.1":
+			case "26.1.2":
+				serverVersion = ServerVersion.v26_1;
+				break;
+			case "26.2":
+				serverVersion = ServerVersion.v26_2;
+				break;
+			default:
                 try{
                     serverVersion = ServerVersion.valueOf(packageName.replace("org.bukkit.craftbukkit.", ""));
                 }catch(Exception e){
@@ -179,21 +215,50 @@ public final class VoiidCountdownTimer extends JavaPlugin {
         if(!result.isError()){
             String latestVersion = result.getLatestVersion();
 
-            if (configsManager.getMainConfigManager().isUpdate_notification() && !configsManager.getMainConfigManager().isAuto_update()) sendConsoleUpdateMessage(latestVersion);
+            if (configsManager.getMainConfigManager().isUpdate_notification() && !configsManager.getMainConfigManager().isAuto_update()) {
+                sendConsoleUpdateMessage(latestVersion);
+                if (latestVersion != null) notifyOnlineStaffOfUpdate(latestVersion);
+            }
 
             if (configsManager.getMainConfigManager().isAuto_update()) {
                 if (latestVersion != null && !latestVersion.equalsIgnoreCase(version)) {
                     messagesManager.console("&bAn stable update for Voiid Countdown Timer &e("+latestVersion+") &bis available. Downloading shortly...");
 
+                    Runnable downloadAndNotify = () -> {
+                        if (UpdateDownloaderGithub.downloadUpdate()) {
+                            notifyOnlineStaffOfUpdate(latestVersion);
+                        }
+                    };
+
                     if (ServerCompatibility.isFolia()) {
-                        Bukkit.getGlobalRegionScheduler().runDelayed(this, scheduledTask -> UpdateDownloaderGithub.downloadUpdate(), 2L);
+                        Bukkit.getAsyncScheduler().runNow(this, scheduledTask -> downloadAndNotify.run());
                     } else {
-                        Bukkit.getScheduler().runTaskAsynchronously(this, () -> UpdateDownloaderGithub.downloadUpdate());
+                        Bukkit.getScheduler().runTaskAsynchronously(this, downloadAndNotify);
                     }
                 }
             }
         }else{
             if (configsManager.getMainConfigManager().isUpdate_notification() && !configsManager.getMainConfigManager().isAuto_update()) messagesManager.console(prefix+"&cAn error occurred while checking for updates.");
+        }
+    }
+
+    private void notifyOnlineStaffOfUpdate(String latestVersion) {
+        Runnable notify = () -> {
+            Map<String, String> repl = new HashMap<>();
+            repl.put("%LATEST%", latestVersion);
+            repl.put("%UPDATELINK%", "https://modrinth.com/datapack/voiid-countdown-timer");
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.isOp() || player.hasPermission("voiidcountdowntimer.admin")) {
+                    messagesManager.sendList(player, "system.update.available", true, repl);
+                }
+            }
+        };
+
+        if (ServerCompatibility.isFolia()) {
+            Bukkit.getGlobalRegionScheduler().run(this, scheduledTask -> notify.run());
+        } else {
+            Bukkit.getScheduler().runTask(this, notify);
         }
     }
 
