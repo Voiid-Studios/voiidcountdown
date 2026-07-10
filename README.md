@@ -82,6 +82,9 @@ Voiid Countdown Timer includes:
 
 ## [📚 Plugin Documentation](https://vctdocs.mintlify.app/)
 
+## ⚡ fastStats
+[![Servers & Players](https://faststats.dev/embed/27a106e9-f65e-4bf4-af54-b322f2fffd19.svg?w=960&h=340&theme=dark)](https://faststats.dev/project/vct/stats)
+
 ## 🔥 bStats
 <a href="https://bstats.org/plugin/bukkit/VoiidCountdownTimer/26790" target="_blank" rel="noopener noreferrer"><img src="https://bstats.org/signatures/bukkit/VoiidCountdownTimer.svg" alt="VCT bStats"/></a>
 
