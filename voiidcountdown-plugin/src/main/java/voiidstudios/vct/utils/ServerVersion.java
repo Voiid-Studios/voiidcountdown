@@ -23,7 +23,10 @@ public enum ServerVersion {
     v1_21_R3,
     v1_21_R4,
     v1_21_R5,
-    v1_21_R6;
+    v1_21_R6,
+    v1_21_R7,
+    v26_1,
+    v26_2;
 
     public boolean serverVersionGreaterEqualThan(ServerVersion version1,ServerVersion version2){
         return version1.ordinal() >= version2.ordinal();
